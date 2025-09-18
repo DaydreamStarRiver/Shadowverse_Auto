@@ -6,7 +6,7 @@
 import threading
 import logging
 import time
-from adbutils import device
+from adbutils import adb
 import cv2
 import numpy as np
 import os
@@ -99,18 +99,25 @@ class DeviceManager:
 
         for attempt in range(1, max_retries + 1):
             try:
+                import os
                 from adbutils import adb
                 import uiautomator2 as u2
                 
-                # 直接连接设备
-                adb_device = adb.device(serial)
-                if adb_device is None:
-                    raise RuntimeError(f"无法连接设备: {serial}")
-
-                # 同时返回 u2 设备对象
+                # 使用虚拟环境中的ADB工具路径
+                adb_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "shadowverse_automation", ".venv", "Lib", "site-packages", "adbutils", "binaries", "adb.exe")
+                
+                # 设置环境变量，确保uiautomator2也能找到ADB工具
+                os.environ['ANDROID_HOME'] = os.path.dirname(adb_path)
+                os.environ['PATH'] = os.path.dirname(adb_path) + os.pathsep + os.environ.get('PATH', '')
+                
+                # 使用uiautomator2直接连接设备
                 u2_device = u2.connect(serial)
+                if u2_device is None:
+                    raise RuntimeError(f"无法连接设备: {serial}")
+                
+                # 将u2_device同时赋值给adb_device，因为它们有类似的接口
                 device_state.u2_device = u2_device
-                device_state.adb_device = adb_device
+                device_state.adb_device = u2_device
                 
                 logger.info(f"已连接设备: {serial}")
                 return True
@@ -364,4 +371,4 @@ class DeviceManager:
         logger.info("=== 所有设备运行完成 ===")
         for serial, device_state in self.device_states.items():
             summary = device_state.get_run_summary()
-            logger.info(f"设备 {serial}: {summary['matches_completed']} 场对战") 
+            logger.info(f"设备 {serial}: {summary['matches_completed']} 场对战")
