@@ -1,34 +1,109 @@
 {
-  "adb_port": 5037,
-  "devices": [
-    {
-      "name": "MuMu模拟器",
-      "serial": "127.0.0.1:16384",
-      "screenshot_deep_color": true,
-      "is_global": true
+    "adb_port": 5037,
+    "devices": [
+        {
+            "name": "模拟器-127.0.0.1:16384",
+            "serial": "127.0.0.1:16384",
+            "is_global": true,
+            "screenshot_deep_color": false
+        }
+    ],
+    "game": {
+        "human_like_drag_duration_range": [
+            0.1,
+            0.13
+        ]
+    },
+    "change_card_cost_threshold": 3,
+    "priority_cards": {
+        "烈绝的灭牙": {
+            "priority": 5
+        },
+        "虎鲸的呼声": {
+            "priority": 3
+        },
+        "海洋骑手": {
+            "priority": 4
+        },
+        "荣弦的奏乐": {
+            "priority": 2
+        },
+        "银冰吐息": {
+            "priority": 2
+        },
+        "飓风天业格里姆尼尔": {
+            "priority": 4
+        },
+        "龙之启示": {
+            "priority": 3
+        },
+        "侮蔑的祈祷者": {
+            "priority": 5
+        },
+        "烈绝的显现嘉尔缪": {
+            "priority": 5
+        },
+        "灾祸吐息": {
+            "priority": 3
+        },
+        "命运黄昏奥丁": {
+            "priority": 5
+        },
+        "苍诲的制裁尼普顿": {
+            "priority": 4
+        },
+        "凶鲎战士": {
+            "priority": 4
+        },
+        "绚丽凤凰": {
+            "priority": 5
+        },
+        "龙人演义卧龙": {
+            "priority": 4
+        },
+        "侮蔑的继承者安吉拉弗利特": {
+            "priority": 5
+        },
+        "夜幕龙": {
+            "priority": 5
+        }
+    },
+    "evolve_priority_cards": {
+        "烈绝的灭牙": {
+            "priority": 5
+        },
+        "海洋骑手": {
+            "priority": 5
+        },
+        "飓风天业格里姆尼尔": {
+            "priority": 5
+        },
+        "侮蔑的祈祷者": {
+            "priority": 5
+        },
+        "烈绝的显现嘉尔缪": {
+            "priority": 5
+        },
+        "命运黄昏奥丁": {
+            "priority": 5
+        },
+        "苍诲的制裁尼普顿": {
+            "priority": 4
+        },
+        "凶鲎战士": {
+            "priority": 4
+        },
+        "绚丽凤凰": {
+            "priority": 5
+        },
+        "龙人演义卧龙": {
+            "priority": 4
+        },
+        "侮蔑的继承者安吉拉弗利特": {
+            "priority": 5
+        },
+        "夜幕龙": {
+            "priority": 5
+        }
     }
-  ],
-  "game": {
-    "human_like_drag_duration_range": [0.10, 0.13]
-  },
-  "change_card_cost_threshold": 3,
-  "high_priority_cards": {
-    "蛇神之怒": {"priority": 3},
-    "无极猎人阿拉加维": {"priority": 2},
-    "命运黄昏奥丁": {"priority": 4},
-    "王断的天宫斯塔奇鸟姆": {"priority": 2},
-    "命运黄昏奥丁": {"priority": 3},
-    "勇武的堕天使奥莉薇": {"priority": 1},
-    "怨灵": {"priority": 3},
-    "触手撕咬": {"priority": 2},
-    "诅咒派对": {"priority": 1},
-    "白银骑士团团长艾蜜莉亚": {"priority": 3},
-    "剑士的斩击": {"priority": 1}
-  },
-  "evolve_priority_cards": {
-    "白银骑士团团长艾蜜莉亚": {"priority": 2},
-    "勇武的堕天使奥莉薇": {"priority": 1},
-    "无极猎人阿拉加维": {"priority": 3},
-    "王断的天宫斯塔奇鸟姆": {"priority": 1}
-  }
 }
