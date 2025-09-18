@@ -43,7 +43,6 @@ shadowverse_automation/
 ├── templates/                 # 识别模板图片
 ├── models/                    # OCR模型文件
 ├── shadowverse_auto_ui.py     # 带UI的主程序入口
-├── main.py                    # 命令行模式主程序入口
 ├── config.json                # 配置文件
 ├── requirements.txt           # 依赖库列表
 └── README.md                  # 项目说明文档
