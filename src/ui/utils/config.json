@@ -1,0 +1,5 @@
+{
+  "server": "intl",
+  "adb_port": "127.0.0.1:16384",
+  "dark_mode": false
+}
