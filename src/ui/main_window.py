@@ -133,12 +133,33 @@ class ShadowverseUI(QMainWindow):
     def setup_ui(self):
         # 窗口基础设置
         self.setWindowTitle("Shadowverse Automation")
-        self.setGeometry(100, 100, 1000, 700)
+        
+        # 从配置文件加载窗口大小
+        config_path = os.path.join(get_exe_dir(), "config.json")
+        window_width = 1200
+        window_height = 1000
+        
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config_data = json.load(f)
+                    if "window" in config_data:
+                        if "width" in config_data["window"]:
+                            window_width = config_data["window"]["width"]
+                        if "height" in config_data["window"]:
+                            window_height = config_data["window"]["height"]
+            except Exception as e:
+                print(f"加载窗口大小配置失败: {str(e)}")
+        
+        # 设置窗口位置和大小
+        self.setGeometry(100, 100, window_width, window_height)
+        
         # 添加必要的窗口标志以支持调整大小
         # 设置窗口标志（已禁用拉伸功能）
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint)
+        
         # 设置最小窗口尺寸
-        self.setMinimumSize(1200, 1000)
+        self.setMinimumSize(800, 600)
         # 已实现自定义窗口边缘调整大小功能
         
         # 设置背景
