@@ -129,7 +129,7 @@ Shadowverse Automation(2025/9/18)
 - 增强了异常处理，添加了详细的错误追踪信息
 
 Shadowverse Automation(2025/9/19)
-- 优化了UI，重构了部分UI
+- 优化了UI，重构了部分UI，更新了窗口大小调整设置
 - 优化了配置保存逻辑，确保config.json不存在时能创建新配置字典
 - 修复了卡组保存功能，添加quanka目录创建和save_time字段记录保存时间
 - 优化了卡组加载功能，重构load_saved_deck方法，修复缩进错误，提高卡片查找效率
