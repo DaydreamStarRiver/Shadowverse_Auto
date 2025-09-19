@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 卡组选择页面模块
@@ -9,10 +8,10 @@ import os
 import shutil
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-    QGroupBox, QGridLayout, QScrollArea, QComboBox, QMessageBox
+    QGroupBox, QGridLayout, QScrollArea, QComboBox, QMessageBox, QFrame
 )
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QLinearGradient, QColor
 from src.utils.resource_utils import resource_path
 
 class CardSelectPage(QWidget):
@@ -22,7 +21,7 @@ class CardSelectPage(QWidget):
         self.current_page = 0
         self.selected_cards = []
         self.cards_per_row = 4
-        self.card_size = QSize(100, 140)  # 减小卡片尺寸以显示更多图片
+        self.card_size = QSize(110, 154)  # 稍微增大卡片尺寸以提高显示质量
         self.cost_filters = {}  # 存储费用筛选按钮
         self.all_cards = []     # 所有卡片
         self.filtered_cards = [] # 筛选后的卡片
@@ -31,17 +30,66 @@ class CardSelectPage(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        # 设置主窗口背景
+        self.setStyleSheet("background-color: #2D2D4A;")
+        
+        # 主布局
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         
-        # 标题
+        # 标题区域
+        header_frame = QFrame()
+        header_frame.setStyleSheet("""
+            QFrame {
+                background-color: rgba(60, 60, 90, 100);
+                border-radius: 10px;
+                border: 1px solid #4A4A7F;
+            }
+        """)
+        header_layout = QVBoxLayout(header_frame)
+        header_layout.setContentsMargins(20, 15, 20, 15)
+        
         title_label = QLabel("卡组选择")
-        title_label.setStyleSheet("font-size: 20px; color: #88AAFF; font-weight: bold;")
+        title_label.setStyleSheet("""
+            QLabel {
+                font-size: 24px;
+                color: #88AAFF;
+                font-weight: bold;
+                padding-bottom: 5px;
+            }
+        """)
         title_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(title_label)
+        header_layout.addWidget(title_label)
+        
+        desc_label = QLabel("从以下卡牌中选择您的卡组，点击保存应用选择")
+        desc_label.setStyleSheet("""
+            QLabel {
+                font-size: 16px;
+                color: #CCDDFF;
+                font-weight: bold;
+            }
+        """)
+        desc_label.setAlignment(Qt.AlignCenter)
+        header_layout.addWidget(desc_label)
+        
+        main_layout.addWidget(header_frame)
 
+        # 搜索和筛选区域
+        filter_frame = QFrame()
+        filter_frame.setStyleSheet("""
+            QFrame {
+                background-color: rgba(60, 60, 90, 100);
+                border-radius: 10px;
+                border: 1px solid #4A4A7F;
+                padding: 10px;
+            }
+        """)
+        filter_layout = QVBoxLayout(filter_frame)
+        
         # 搜索框和分类选择
         search_layout = QHBoxLayout()
+        search_layout.setSpacing(15)
         
         # 分类选择下拉框
         self.category_combo = QComboBox()
@@ -50,17 +98,33 @@ class CardSelectPage(QWidget):
             QComboBox {
                 background-color: rgba(80, 80, 120, 180);
                 color: white;
+                font-size: 14px;
                 border: 1px solid #5A5A8F;
                 border-radius: 5px;
-                padding: 5px;
+                padding: 6px 10px;
                 min-width: 120px;
             }
             QComboBox:hover {
                 background-color: rgba(90, 90, 140, 180);
+                border-color: #6A6AAF;
+            }
+            QComboBox::drop-down {
+                border: none;
+                background-color: rgba(80, 80, 120, 180);
+                width: 25px;
+                border-left: 1px solid #5A5A8F;
+            }
+            QComboBox::down-arrow {
+                image: url(:/icons/down_arrow.png);
+                width: 12px;
+                height: 12px;
             }
         """)
         self.category_combo.currentIndexChanged.connect(self.on_category_changed)
-        search_layout.addWidget(QLabel("分类:"))
+        
+        category_label = QLabel("分类:")
+        category_label.setStyleSheet("color: #CCDDFF; font-size: 14px;")
+        search_layout.addWidget(category_label)
         search_layout.addWidget(self.category_combo)
         
         # 搜索框
@@ -70,25 +134,38 @@ class CardSelectPage(QWidget):
             QLineEdit {
                 background-color: rgba(80, 80, 120, 180);
                 color: white;
+                font-size: 14px;
                 border: 1px solid #5A5A8F;
                 border-radius: 5px;
-                padding: 5px;
+                padding: 6px 10px;
+                min-width: 200px;
+            }
+            QLineEdit:hover {
+                border-color: #6A6AAF;
+            }
+            QLineEdit:focus {
+                border-color: #88AAFF;
+                background-color: rgba(90, 90, 140, 180);
+            }
+            QLineEdit::placeholder-text {
+                color: #AAAACC;
+                font-style: italic;
             }
         """)
         self.search_input.textChanged.connect(self.on_search_text_changed)
-        search_layout.addWidget(QLabel("搜索:"))
-        search_layout.addWidget(self.search_input)
         
-        main_layout.addLayout(search_layout)
-
+        search_label = QLabel("搜索:")
+        search_label.setStyleSheet("color: #CCDDFF; font-size: 14px;")
+        search_layout.addWidget(search_label)
+        search_layout.addWidget(self.search_input)
+        search_layout.addStretch()
+        
+        filter_layout.addLayout(search_layout)
+        
         # 费用筛选栏
-        self.init_cost_filter(main_layout)
-
-        # 说明标签
-        desc_label = QLabel("从以下卡牌中选择您的卡组，点击保存应用选择")
-        desc_label.setStyleSheet("font-size: 14px; color: #AACCFF;")
-        desc_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(desc_label)
+        self.init_cost_filter(filter_layout)
+        
+        main_layout.addWidget(filter_frame)
         
         # 卡片显示区域
         self.scroll_area = QScrollArea()
@@ -96,27 +173,123 @@ class CardSelectPage(QWidget):
         self.scroll_content = QWidget()
         self.grid_layout = QGridLayout(self.scroll_content)
         self.grid_layout.setAlignment(Qt.AlignTop)
+        self.grid_layout.setSpacing(10)
         self.scroll_area.setWidget(self.scroll_content)
         
         # 设置滚动区域样式
         self.scroll_area.setStyleSheet("""
             QScrollArea {
-                background-color: transparent;
-                border: none;
+                background-color: rgba(45, 45, 75, 150);
+                border: 1px solid #4A4A7F;
+                border-radius: 10px;
+            }
+            QScrollArea QScrollBar:vertical {
+                background-color: rgba(60, 60, 90, 150);
+                width: 10px;
+                border-radius: 5px;
+                margin: 2px;
+            }
+            QScrollArea QScrollBar::handle:vertical {
+                background-color: rgba(80, 80, 120, 150);
+                border-radius: 5px;
+                min-height: 20px;
+            }
+            QScrollArea QScrollBar::handle:vertical:hover {
+                background-color: rgba(90, 90, 140, 150);
+            }
+            QScrollArea QScrollBar::add-line:vertical, 
+            QScrollArea QScrollBar::sub-line:vertical {
+                height: 0px;
             }
             QWidget#ScrollContent {
                 background-color: transparent;
+                padding: 10px;
             }
         """)
         self.scroll_content.setObjectName("ScrollContent")
         main_layout.addWidget(self.scroll_area)
         
+        # 底部控制区域
+        bottom_frame = QFrame()
+        bottom_frame.setStyleSheet("""
+            QFrame {
+                background-color: rgba(60, 60, 90, 100);
+                border-radius: 10px;
+                border: 1px solid #4A4A7F;
+            }
+        """)
+        bottom_layout = QVBoxLayout(bottom_frame)
+        bottom_layout.setContentsMargins(20, 10, 20, 15)
+        
         # 翻页控制
         page_control_layout = QHBoxLayout()
+        page_control_layout.setSpacing(10)
+        
+        # 创建美观的分页控件
         self.prev_btn = QPushButton("上一页")
+        self.prev_btn.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4A4A7F, stop: 1 #3A3A6F);
+                color: white;
+                font-size: 14px;
+                border: 1px solid #5A5A8F;
+                border-radius: 6px;
+                padding: 6px 12px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #5A5A9F, stop: 1 #4A4A8F);
+                border-color: #6A6AAF;
+            }
+            QPushButton:disabled {
+                background-color: #3A3A6F;
+                color: #8888AA;
+                border-color: #4A4A7F;
+            }
+            QPushButton:pressed {
+                background-color: #3A3A6F;
+            }
+        """)
         self.prev_btn.clicked.connect(self.prev_page)
+        
         self.page_label = QLabel("第1页")
+        self.page_label.setStyleSheet("""
+            QLabel {
+                color: #CCDDFF;
+                font-size: 14px;
+                padding: 6px 15px;
+                min-width: 100px;
+                text-align: center;
+                background-color: rgba(60, 60, 90, 150);
+                border-radius: 6px;
+                border: 1px solid #4A4A7F;
+            }
+        """)
+        
         self.next_btn = QPushButton("下一页")
+        self.next_btn.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4A4A7F, stop: 1 #3A3A6F);
+                color: white;
+                font-size: 14px;
+                border: 1px solid #5A5A8F;
+                border-radius: 6px;
+                padding: 6px 12px;
+                min-width: 80px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #5A5A9F, stop: 1 #4A4A8F);
+                border-color: #6A6AAF;
+            }
+            QPushButton:disabled {
+                background-color: #3A3A6F;
+                color: #8888AA;
+                border-color: #4A4A7F;
+            }
+            QPushButton:pressed {
+                background-color: #3A3A6F;
+            }
+        """)
         self.next_btn.clicked.connect(self.next_page)
         
         page_control_layout.addStretch()
@@ -124,13 +297,59 @@ class CardSelectPage(QWidget):
         page_control_layout.addWidget(self.page_label)
         page_control_layout.addWidget(self.next_btn)
         page_control_layout.addStretch()
-        main_layout.addLayout(page_control_layout)
+        
+        bottom_layout.addLayout(page_control_layout)
         
         # 操作按钮
         btn_layout = QHBoxLayout()
+        btn_layout.setSpacing(15)
+        
         self.save_btn = QPushButton("保存卡组")
+        self.save_btn.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6A8AFF, stop: 1 #5A7AFF);
+                color: white;
+                font-size: 14px;
+                border: 1px solid #7A9AFF;
+                border-radius: 6px;
+                padding: 8px 16px;
+                min-width: 120px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7AA9FF, stop: 1 #6A8AFF);
+                border-color: #8AB9FF;
+            }
+            QPushButton:disabled {
+                background-color: #5A7ABF;
+                color: #8888AA;
+                border-color: #6A8ACF;
+            }
+            QPushButton:pressed {
+                background-color: #5A7AFF;
+            }
+        """)
         self.save_btn.clicked.connect(self.save_selection)
+        
         self.back_btn = QPushButton("返回主界面")
+        self.back_btn.setStyleSheet("""
+            QPushButton {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #4A4A7F, stop: 1 #3A3A6F);
+                color: white;
+                font-size: 14px;
+                border: 1px solid #5A5A8F;
+                border-radius: 6px;
+                padding: 8px 16px;
+                min-width: 120px;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #5A5A9F, stop: 1 #4A4A8F);
+                border-color: #6A6AAF;
+            }
+            QPushButton:pressed {
+                background-color: #3A3A6F;
+            }
+        """)
         self.back_btn.clicked.connect(lambda: self.parent.stacked_widget.setCurrentIndex(0))
         
         btn_layout.addStretch()
@@ -138,15 +357,23 @@ class CardSelectPage(QWidget):
         btn_layout.addWidget(self.back_btn)
         btn_layout.addStretch()
         
-        main_layout.addLayout(btn_layout)
+        bottom_layout.addLayout(btn_layout)
+        
+        main_layout.addWidget(bottom_frame)
         
         # 加载卡片
         self.load_cards()
 
-    def init_cost_filter(self, main_layout):
+    def init_cost_filter(self, filter_layout):
         """初始化费用筛选控件"""
-        cost_filter_layout = QHBoxLayout()
-        cost_filter_layout.addWidget(QLabel("费用筛选:"))
+        cost_filter_frame = QFrame()
+        cost_filter_frame.setStyleSheet("background-color: transparent;")
+        cost_filter_layout = QHBoxLayout(cost_filter_frame)
+        cost_filter_layout.setSpacing(8)
+        
+        cost_label = QLabel("费用筛选:")
+        cost_label.setStyleSheet("color: #CCDDFF; font-size: 14px;")
+        cost_filter_layout.addWidget(cost_label)
         
         # 添加0-10费选项
         for cost in range(0, 11):
@@ -154,20 +381,26 @@ class CardSelectPage(QWidget):
             btn.setCheckable(True)
             btn.setStyleSheet("""
                 QPushButton {
-                    background-color: #4A4A7F;
+                    background-color: rgba(80, 80, 120, 180);
                     color: white;
-                    border: none;
-                    padding: 5px 8px;
-                    min-width: 40px;
+                    font-size: 14px;
+                    border: 1px solid #5A5A8F;
                     border-radius: 4px;
-                    margin: 2px;
+                    padding: 5px 10px;
+                    min-width: 50px;
+                    text-align: center;
                 }
                 QPushButton:checked {
-                    background-color: #88AAFF;
+                    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88AAFF, stop: 1 #789AFF);
                     font-weight: bold;
+                    border-color: #88AAFF;
                 }
                 QPushButton:hover {
-                    background-color: #5A5A9F;
+                    background-color: rgba(90, 90, 140, 180);
+                    border-color: #6A6AAF;
+                }
+                QPushButton:pressed {
+                    background-color: rgba(70, 70, 110, 180);
                 }
             """)
             btn.clicked.connect(self.update_card_display)
@@ -180,19 +413,29 @@ class CardSelectPage(QWidget):
         all_btn.setChecked(True)
         all_btn.setStyleSheet("""
             QPushButton {
-                background-color: #88AAFF;
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88AAFF, stop: 1 #789AFF);
                 color: white;
                 font-weight: bold;
-                padding: 5px 10px;
+                font-size: 14px;
+                border: 1px solid #88AAFF;
                 border-radius: 4px;
-                margin: 2px;
+                padding: 5px 12px;
+                min-width: 60px;
+                text-align: center;
+            }
+            QPushButton:hover {
+                background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #98BAFF, stop: 1 #88AAFF);
+                border-color: #98BAFF;
+            }
+            QPushButton:pressed {
+                background-color: #789AFF;
             }
         """)
         all_btn.clicked.connect(self.select_all_costs)
         cost_filter_layout.addWidget(all_btn)
         
         cost_filter_layout.addStretch()
-        main_layout.addLayout(cost_filter_layout)
+        filter_layout.addWidget(cost_filter_frame)
 
     def load_cards(self):
         """加载所有卡片和分类"""
@@ -332,20 +575,31 @@ class CardSelectPage(QWidget):
             card_path = resource_path(os.path.join("quanka", card_data["path"]))
             
             # 创建卡片容器
-            card_container = QWidget()
+            card_container = QFrame()
             card_container.setStyleSheet("""
-                background-color: rgba(60, 60, 90, 150);
-                border-radius: 10px;
+                QFrame {
+                    background-color: rgba(60, 60, 90, 180);
+                    border-radius: 10px;
+                    border: 1px solid #5A5A8F;
+                    padding: 5px;
+                    margin: 5px;
+                }
+                QFrame:hover {
+                    border-color: #6A6AAF;
+                    background-color: rgba(70, 70, 100, 180);
+                }
             """)
             card_layout = QVBoxLayout(card_container)
             card_layout.setAlignment(Qt.AlignCenter)
-            card_layout.setSpacing(5)
+            card_layout.setSpacing(6)
             card_layout.setContentsMargins(5, 5, 5, 5)
             
             # 卡片图片
             card_label = QLabel()
+            card_label.setStyleSheet("background-color: rgba(45, 45, 75, 180); border-radius: 5px;")
             pixmap = QPixmap(card_path)
             if not pixmap.isNull():
+                # 添加平滑变换以提高图片质量
                 pixmap = pixmap.scaled(self.card_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 card_label.setPixmap(pixmap)
             card_label.setAlignment(Qt.AlignCenter)
@@ -354,16 +608,17 @@ class CardSelectPage(QWidget):
             # 卡片名称
             card_name = ' '.join(card_data["file"].split('_', 1)[-1].rsplit('.', 1)[0].split('_'))
             name_label = QLabel(card_name)
-            name_label.setStyleSheet("""
+            style_sheet = """
                 QLabel {
                     color: #FFFFFF;
                     background-color: transparent;
                     font-weight: bold;
                     font-size: 12px;
-                    padding: 2px;
+                    padding: 3px;
                     max-width: %dpx;
                 }
-            """ % (self.card_size.width() - 10))
+            """ % (self.card_size.width() - 10)
+            name_label.setStyleSheet(style_sheet)
             name_label.setAlignment(Qt.AlignCenter)
             name_label.setWordWrap(True)
             
@@ -376,13 +631,22 @@ class CardSelectPage(QWidget):
                     background-color: rgba(80, 80, 120, 180);
                     color: white;
                     border-radius: 5px;
-                    padding: 2px 5px;
+                    padding: 3px 8px;
                     font-size: 12px;
-                    min-width: 60px;
+                    min-width: 70px;
+                    border: 1px solid #5A5A8F;
                 }
                 QPushButton:checked {
-                    background-color: #88AAFF;
+                    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #88AAFF, stop: 1 #789AFF);
                     font-weight: bold;
+                    border-color: #88AAFF;
+                }
+                QPushButton:hover {
+                    background-color: rgba(90, 90, 140, 180);
+                    border-color: #6A6AAF;
+                }
+                QPushButton:pressed {
+                    background-color: rgba(70, 70, 110, 180);
                 }
             """)
             checkbox.clicked.connect(lambda state, f=card_data["file"]: self.toggle_card_selection(f, state))

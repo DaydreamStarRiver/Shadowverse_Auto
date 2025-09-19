@@ -10,7 +10,7 @@ import shutil
 import json
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QScrollArea, 
-    QGridLayout, QMessageBox, QMenu, QAction, QInputDialog
+    QGridLayout, QMessageBox, QMenu, QAction, QInputDialog, QSizePolicy
 )
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap
@@ -22,12 +22,15 @@ class MyDeckPage(QWidget):
         self.parent = parent
         self.current_page = 0
         self.cards_per_row = 4
-        self.card_size = QSize(100, 140)
+        self.card_size = QSize(110, 154)  # 增大卡片尺寸
         self.deck_cards = []
         
         # 使用resource_path获取正确的路径
         self.deck_dir = resource_path("shadowverse_cards_cost")
         self.quanka_dir = resource_path("quanka")
+        
+        # 设置窗口拉伸策略
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         
         # 添加详细调试信息
         print(f"调试: 当前文件路径: {os.path.abspath(__file__)}")
@@ -44,33 +47,104 @@ class MyDeckPage(QWidget):
         self.init_ui()
 
     def init_ui(self):
+        # 设置整体背景色
+        self.setStyleSheet("background-color: #2D2D4A;")
+        
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         
         # 标题
         title_label = QLabel("我的卡组")
-        title_label.setStyleSheet("font-size: 20px; color: #88AAFF; font-weight: bold;")
+        title_label.setStyleSheet(
+            "font-size: 24px; color: #88AAFF; font-weight: bold;"
+            "padding: 10px; border-bottom: 2px solid #4A4A7F;"
+        )
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
 
-        # 操作按钮组
+        # 操作按钮组 - 美化样式
         btn_group_layout = QHBoxLayout()
         btn_group_layout.setSpacing(10)
         
         # 添加卡片按钮
         self.add_cards_btn = QPushButton("添加卡片")
+        self.add_cards_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4A7AFF, stop:1 #3A5ACF);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5A8AFF, stop:1 #4A6ACF);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3A6ACF, stop:1 #2A4ABF);"
+            "}"
+        )
         self.add_cards_btn.clicked.connect(lambda: self.parent.stacked_widget.setCurrentIndex(1))
         
         # 清空卡组按钮
         self.clear_deck_btn = QPushButton("清空卡组")
+        self.clear_deck_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF6A6A, stop:1 #CF5A5A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FF7A7A, stop:1 #CF6A6A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CF5A5A, stop:1 #BF4A4A);"
+            "}"
+        )
         self.clear_deck_btn.clicked.connect(self.clear_deck)
         
         # 保存卡组按钮
         self.save_deck_btn = QPushButton("保存当前卡组")
+        self.save_deck_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #6AFF6A, stop:1 #5ACF5A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #7AFF7A, stop:1 #6ACF6A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5ACF5A, stop:1 #4ABF4A);"
+            "}"
+        )
         self.save_deck_btn.clicked.connect(self.save_current_deck)
         
         # 加载卡组按钮
         self.load_deck_btn = QPushButton("加载保存的卡组")
+        self.load_deck_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFAA6A, stop:1 #CF8A5A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFBA7A, stop:1 #CF9A6A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CF8A5A, stop:1 #BF7A4A);"
+            "}"
+        )
         self.load_deck_btn.clicked.connect(self.load_saved_deck)
         
         btn_group_layout.addWidget(self.add_cards_btn)
@@ -81,25 +155,42 @@ class MyDeckPage(QWidget):
         
         main_layout.addLayout(btn_group_layout)
         
-        # 卡片显示区域
+        # 卡片显示区域 - 美化样式
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_content = QWidget()
         self.grid_layout = QGridLayout(self.scroll_content)
         self.grid_layout.setAlignment(Qt.AlignTop)
+        self.grid_layout.setSpacing(15)
+        self.grid_layout.setContentsMargins(15, 15, 15, 15)
         self.scroll_area.setWidget(self.scroll_content)
         
         # 设置滚动区域样式
-        self.scroll_area.setStyleSheet("""
-            QScrollArea {
-                background-color: transparent;
-                border: none;
-            }
-            QWidget#ScrollContent {
-                background-color: transparent;
-            }
-        """)
+        self.scroll_area.setStyleSheet(
+            "QScrollArea {"
+            "    border: 1px solid #4A4A7F;"
+            "    border-radius: 8px;"
+            "    background-color: #2D2D4A;"
+            "}"
+            "QScrollArea QScrollBar:vertical {"
+            "    width: 12px;"
+            "    background-color: #2D2D4A;"
+            "    border-radius: 6px;"
+            "}"
+            "QScrollArea QScrollBar::handle:vertical {"
+            "    background-color: #4A4A7F;"
+            "    border-radius: 6px;"
+            "    min-height: 20px;"
+            "}"
+            "QScrollArea QScrollBar::handle:vertical:hover {"
+            "    background-color: #5A5A8F;"
+            "}"
+            "QScrollArea QScrollBar::add-line:vertical, QScrollArea QScrollBar::sub-line:vertical {"
+            "    background-color: transparent;"
+            "}"
+        )
         self.scroll_content.setObjectName("ScrollContent")
+        self.scroll_content.setStyleSheet("background-color: #2D2D4A;")
         main_layout.addWidget(self.scroll_area)
         
         # 说明标签
@@ -108,11 +199,27 @@ class MyDeckPage(QWidget):
         self.card_count_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.card_count_label)
         
-        # 返回按钮
+        # 返回按钮 - 美化样式
         back_layout = QHBoxLayout()
         back_layout.addStretch()
         
         self.back_btn = QPushButton("返回主界面")
+        self.back_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #8A8A8A, stop:1 #6A6A6A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 20px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #9A9A9A, stop:1 #7A7A7A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #7A7A7A, stop:1 #5A5A5A);"
+            "}"
+        )
         self.back_btn.clicked.connect(lambda: self.parent.stacked_widget.setCurrentIndex(0))
         back_layout.addWidget(self.back_btn)
         back_layout.addStretch()
@@ -180,12 +287,19 @@ class MyDeckPage(QWidget):
             for card_file in self.deck_cards:
                 card_path = os.path.join(self.deck_dir, card_file)
                 
-                # 创建卡片容器
+                # 创建卡片容器 - 添加悬停效果
                 card_container = QWidget()
-                card_container.setStyleSheet("""
-                    background-color: rgba(60, 60, 90, 150);
-                    border-radius: 10px;
-                """)
+                card_container.setStyleSheet(
+                    "QWidget {"
+                    "    background-color: rgba(60, 60, 90, 180);"
+                    "    border-radius: 10px;"
+                    "    border: 1px solid transparent;"
+                    "}"
+                    "QWidget:hover {"
+                    "    background-color: rgba(74, 122, 255, 0.2);"
+                    "    border: 1px solid #88AAFF;"
+                    "}"
+                )
                 card_layout = QVBoxLayout(card_container)
                 card_layout.setAlignment(Qt.AlignCenter)
                 card_layout.setSpacing(5)
@@ -208,19 +322,20 @@ class MyDeckPage(QWidget):
                 # 右键菜单事件处理
                 card_label.mousePressEvent = lambda event, f=card_file: self.on_card_clicked(event, f)
                 
-                # 卡片名称
+                # 卡片名称 - 美化样式
                 card_name = ' '.join(card_file.split('_', 1)[-1].rsplit('.', 1)[0].split('_'))
                 name_label = QLabel(card_name)
-                name_label.setStyleSheet("""
-                    QLabel {
-                        color: #FFFFFF;
-                        background-color: transparent;
-                        font-weight: bold;
-                        font-size: 12px;
-                        padding: 2px;
-                        max-width: %dpx;
-                    }
-                """ % (self.card_size.width() - 10))
+                name_label.setStyleSheet(
+                    "QLabel {"
+                    "    color: #FFFFFF;"
+                    "    background-color: rgba(74, 74, 127, 0.3);"
+                    "    font-weight: bold;"
+                    "    font-size: 12px;"
+                    "    padding: 4px 8px;"
+                    "    border-radius: 4px;"
+                    "    max-width: %dpx;"
+                    "}"
+                % (self.card_size.width() - 10))
                 name_label.setAlignment(Qt.AlignCenter)
                 name_label.setWordWrap(True)
                 
@@ -339,13 +454,18 @@ class MyDeckPage(QWidget):
         
         if ok and deck_name.strip():
             deck_name = deck_name.strip()
+            
+            # 确保quanka目录存在
+            os.makedirs(self.quanka_dir, exist_ok=True)
+            
             backup_path = os.path.join(self.quanka_dir, f"{deck_name}.json")
             
             # 构建卡组数据
             deck_data = {
                 "name": deck_name,
                 "cards": self.deck_cards,
-                "card_count": len(self.deck_cards)
+                "card_count": len(self.deck_cards),
+                "save_time": os.path.getmtime(self.deck_dir)  # 添加保存时间
             }
             
             # 检查是否已存在同名卡组
@@ -432,6 +552,12 @@ class MyDeckPage(QWidget):
                     print(f"调试: load_saved_deck方法中的quanka_dir: {quanka_dir}")
                     print(f"调试: load_saved_deck方法中的quanka_dir存在: {os.path.exists(quanka_dir)}")
                     
+                    # 确保quanka目录存在
+                    os.makedirs(quanka_dir, exist_ok=True)
+                    
+                    # 确保deck_dir存在
+                    os.makedirs(self.deck_dir, exist_ok=True)
+                    
                     # 首先显示quanka目录下的所有子目录
                     if os.path.exists(quanka_dir):
                         subdirs = [d for d in os.listdir(quanka_dir) if os.path.isdir(os.path.join(quanka_dir, d))]
@@ -442,19 +568,13 @@ class MyDeckPage(QWidget):
                         card_found = False
                         card_path = None
                         
-                        # 先遍历所有子目录查找卡片
-                        if os.path.exists(quanka_dir):
-                            for faction_dir in os.listdir(quanka_dir):
-                                faction_path = os.path.join(quanka_dir, faction_dir)
-                                if os.path.isdir(faction_path):
-                                    potential_path = os.path.join(faction_path, card_file)
-                                    if os.path.exists(potential_path):
-                                        card_path = potential_path
-                                        card_found = True
-                                        break
-                        
-                        # 如果子目录中没找到，尝试使用os.walk递归查找
-                        if not card_found:
+                        # 尝试直接在quanka目录下查找
+                        direct_path = os.path.join(quanka_dir, card_file)
+                        if os.path.exists(direct_path):
+                            card_path = direct_path
+                            card_found = True
+                        else:
+                            # 递归搜索整个quanka目录
                             for root, _, files in os.walk(quanka_dir):
                                 if card_file in files:
                                     card_path = os.path.join(root, card_file)

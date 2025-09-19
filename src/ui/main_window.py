@@ -121,13 +121,25 @@ class ShadowverseUI(QMainWindow):
         self.notification_manager = NotificationManager()
         self.clipboard = QApplication.clipboard()
         self.start_time = 0
+        # 窗口调整大小功能已禁用
+        self.dragging = False  # 仅保留窗口拖动功能
         self.setup_ui()
+        
+        # 加载示例运行日志
+
+        
+
 
     def setup_ui(self):
         # 窗口基础设置
         self.setWindowTitle("Shadowverse Automation")
         self.setGeometry(100, 100, 1000, 700)
-        self.setWindowFlags(Qt.FramelessWindowHint)
+        # 添加必要的窗口标志以支持调整大小
+        # 设置窗口标志（已禁用拉伸功能）
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowSystemMenuHint | Qt.WindowMinimizeButtonHint)
+        # 设置最小窗口尺寸
+        self.setMinimumSize(1200, 1000)
+        # 已实现自定义窗口边缘调整大小功能
         
         # 设置背景
         self.set_background()
@@ -239,6 +251,8 @@ class ShadowverseUI(QMainWindow):
         self.is_maximized = False
         self.dragging = False
         self.offset = QPoint()
+        self.resizing = False
+        self.resize_direction = None
         
         # 加载配置
         self.load_current_config()
@@ -679,19 +693,24 @@ class ShadowverseUI(QMainWindow):
             self.run_time_label.setText("运行时间: 00:00:00")
 
     def mousePressEvent(self, event):
-        """鼠标按下事件"""
-        if event.button() == Qt.LeftButton and event.pos().y() <= 40:
-            self.dragging = True
-            self.offset = event.pos()
+        """鼠标按下事件（已禁用拉伸功能，仅保留拖动）"""
+        if event.button() == Qt.LeftButton:
+            pos = event.pos()
+            # 仅保留标题栏拖动功能
+            if pos.y() <= 40:
+                self.dragging = True
+                self.offset = event.pos()
 
     def mouseMoveEvent(self, event):
-        """鼠标移动事件"""
+        """鼠标移动事件（已禁用拉伸功能，仅保留拖动）"""
+        # 仅处理窗口拖动
         if self.dragging and not self.is_maximized:
             self.move(event.globalPos() - self.offset)
 
     def mouseReleaseEvent(self, event):
-        """鼠标释放事件"""
+        """鼠标释放事件（已禁用拉伸功能）"""
         self.dragging = False
+        self.setCursor(Qt.ArrowCursor)
 
     def closeEvent(self, event):
         """窗口关闭事件"""

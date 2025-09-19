@@ -13,7 +13,7 @@ import zlib
 import hashlib
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-    QScrollArea, QGridLayout, QMessageBox
+    QScrollArea, QGridLayout, QMessageBox, QSizePolicy
 )
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QFont
@@ -24,40 +24,74 @@ class SharePage(QWidget):
         super().__init__(parent)
         self.parent = parent
         self.version = "1.0.0"
+        
+        # 设置窗口拉伸策略
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.init_ui()
 
     def init_ui(self):
+        # 设置整体背景色
+        self.setStyleSheet("background-color: #2D2D4A;")
+        
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         
         # 标题
         title_label = QLabel("卡组分享和应用")
-        title_label.setStyleSheet("font-size: 20px; color: #88AAFF; font-weight: bold;")
+        title_label.setStyleSheet(
+            "font-size: 24px; color: #88AAFF; font-weight: bold;"
+            "padding: 10px; border-bottom: 2px solid #4A4A7F;"
+        )
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
 
-        # 分享码输入区域
+        # 分享码输入区域 - 美化样式
         share_layout = QVBoxLayout()
         share_layout.setSpacing(10)
         
         # 应用分享码
         apply_layout = QHBoxLayout()
-        apply_layout.addWidget(QLabel("分享码:"))
+        share_code_label = QLabel("分享码:")
+        share_code_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        apply_layout.addWidget(share_code_label)
         
         self.share_code_input = QLineEdit()
         self.share_code_input.setPlaceholderText("请输入分享码...")
-        self.share_code_input.setStyleSheet("""
-            QLineEdit {
-                background-color: rgba(80, 80, 120, 180);
-                color: white;
-                border: 1px solid #5A5A8F;
-                border-radius: 5px;
-                padding: 5px;
-            }
-        """)
+        self.share_code_input.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: #3A3A6A;"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "}"
+            "QLineEdit:focus {"
+            "    border: 1px solid #88AAFF;"
+            "    background-color: #4A4A7A;"
+            "}"
+        )
+        self.share_code_input.setMinimumWidth(350)
         apply_layout.addWidget(self.share_code_input)
         
         self.apply_btn = QPushButton("应用")
+        self.apply_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4A7AFF, stop:1 #3A5ACF);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5A8AFF, stop:1 #4A6ACF);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3A6ACF, stop:1 #2A4ABF);"
+            "}"
+        )
         self.apply_btn.clicked.connect(self.apply_share_code)
         apply_layout.addWidget(self.apply_btn)
         
@@ -65,26 +99,61 @@ class SharePage(QWidget):
         
         # 生成分享码
         generate_layout = QHBoxLayout()
-        generate_layout.addWidget(QLabel("当前卡组分享码:"))
+        current_share_label = QLabel("当前卡组分享码:")
+        current_share_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        generate_layout.addWidget(current_share_label)
         
         self.share_code_output = QLineEdit()
         self.share_code_output.setReadOnly(True)
-        self.share_code_output.setStyleSheet("""
-            QLineEdit {
-                background-color: rgba(60, 60, 100, 180);
-                color: #CCCCCC;
-                border: 1px solid #5A5A8F;
-                border-radius: 5px;
-                padding: 5px;
-            }
-        """)
+        self.share_code_output.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: #3A3A6A;"
+            "    color: #CCCCCC;"
+            "    font-size: 14px;"
+            "    padding: 8px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "}"
+        )
         generate_layout.addWidget(self.share_code_output)
         
         self.copy_btn = QPushButton("复制")
+        self.copy_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFAA6A, stop:1 #CF8A5A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #FFBA7A, stop:1 #CF9A6A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #CF8A5A, stop:1 #BF7A4A);"
+            "}"
+        )
         self.copy_btn.clicked.connect(self.copy_share_code)
         generate_layout.addWidget(self.copy_btn)
         
         self.generate_btn = QPushButton("生成")
+        self.generate_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #6AFF6A, stop:1 #5ACF5A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #7AFF7A, stop:1 #6ACF6A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5ACF5A, stop:1 #4ABF4A);"
+            "}"
+        )
         self.generate_btn.clicked.connect(self.generate_share_code)
         generate_layout.addWidget(self.generate_btn)
         
@@ -110,36 +179,68 @@ class SharePage(QWidget):
         
         # 预览区域
         preview_label = QLabel("当前卡组预览")
-        preview_label.setStyleSheet("font-size: 14px; color: #88AAFF; font-weight: bold;")
+        preview_label.setStyleSheet("font-size: 16px; color: #88AAFF; font-weight: bold;")
         main_layout.addWidget(preview_label)
         
-        # 卡片预览区域
+        # 卡片预览区域 - 美化样式
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
         self.scroll_content = QWidget()
         self.grid_layout = QGridLayout(self.scroll_content)
         self.grid_layout.setAlignment(Qt.AlignTop)
+        self.grid_layout.setSpacing(15)
+        self.grid_layout.setContentsMargins(15, 15, 15, 15)
         self.scroll_area.setWidget(self.scroll_content)
         
         # 设置滚动区域样式
         self.scroll_area.setStyleSheet("""
             QScrollArea {
-                background-color: transparent;
-                border: 1px solid #5A5A8F;
-                border-radius: 5px;
+                border: 1px solid #4A4A7F;
+                border-radius: 8px;
+                background-color: #2D2D4A;
             }
-            QWidget#ScrollContent {
+            QScrollArea QScrollBar:vertical {
+                width: 12px;
+                background-color: #2D2D4A;
+                border-radius: 6px;
+            }
+            QScrollArea QScrollBar::handle:vertical {
+                background-color: #4A4A7F;
+                border-radius: 6px;
+                min-height: 20px;
+            }
+            QScrollArea QScrollBar::handle:vertical:hover {
+                background-color: #5A5A8F;
+            }
+            QScrollArea QScrollBar::add-line:vertical, QScrollArea QScrollBar::sub-line:vertical {
                 background-color: transparent;
             }
         """)
         self.scroll_content.setObjectName("ScrollContent")
+        self.scroll_content.setStyleSheet("background-color: #2D2D4A;")
         main_layout.addWidget(self.scroll_area)
         
-        # 返回按钮
+        # 返回按钮 - 美化样式
         back_layout = QHBoxLayout()
         back_layout.addStretch()
         
         self.back_btn = QPushButton("返回主界面")
+        self.back_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #8A8A8A, stop:1 #6A6A6A);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 20px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #9A9A9A, stop:1 #7A7A7A);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #7A7A7A, stop:1 #5A5A5A);"
+            "}"
+        )
         self.back_btn.clicked.connect(lambda: self.parent.stacked_widget.setCurrentIndex(0))
         back_layout.addWidget(self.back_btn)
         back_layout.addStretch()
@@ -181,26 +282,34 @@ class SharePage(QWidget):
             for card_file in deck_cards:
                 card_path = os.path.join(deck_dir, card_file)
                 
-                # 创建卡片容器
+                # 创建卡片容器 - 添加悬停效果
                 card_container = QWidget()
-                card_container.setStyleSheet("""
-                    background-color: rgba(60, 60, 90, 150);
-                    border-radius: 8px;
-                """)
+                card_container.setStyleSheet(
+                    "QWidget {"
+                    "    background-color: rgba(60, 60, 90, 180);"
+                    "    border-radius: 10px;"
+                    "    border: 1px solid transparent;"
+                    "}"
+                    "QWidget:hover {"
+                    "    background-color: rgba(74, 122, 255, 0.2);"
+                    "    border: 1px solid #88AAFF;"
+                    "}"
+                )
                 card_layout = QVBoxLayout(card_container)
                 card_layout.setAlignment(Qt.AlignCenter)
-                card_layout.setSpacing(3)
-                card_layout.setContentsMargins(3, 3, 3, 3)
+                card_layout.setSpacing(5)
+                card_layout.setContentsMargins(5, 5, 5, 5)
                 
-                # 卡片图片
+                # 卡片图片 - 增大尺寸并添加圆角
                 card_label = QLabel()
                 pixmap = QPixmap(card_path)
                 if not pixmap.isNull():
                     pixmap = pixmap.scaled(card_size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                     card_label.setPixmap(pixmap)
+                    card_label.setStyleSheet("border-radius: 3px;")
                 card_label.setAlignment(Qt.AlignCenter)
                 
-                # 卡片名称（只显示前几个字符）
+                # 卡片名称（只显示前几个字符） - 美化样式
                 card_name = ' '.join(card_file.split('_', 1)[-1].rsplit('.', 1)[0].split('_'))
                 if len(card_name) > 8:
                     card_name = card_name[:8] + "..."
@@ -208,9 +317,10 @@ class SharePage(QWidget):
                 name_label.setStyleSheet("""
                     QLabel {
                         color: #FFFFFF;
-                        background-color: transparent;
+                        background-color: rgba(74, 74, 127, 0.3);
                         font-size: 10px;
-                        padding: 1px;
+                        padding: 4px 8px;
+                        border-radius: 4px;
                         max-width: %dpx;
                     }
                 """ % (card_size.width() - 10))
@@ -381,19 +491,22 @@ class SharePage(QWidget):
                 
                 # 保存配置
                 config_path = resource_path("config.json")
-                if os.path.exists(config_path):
-                    try:
+                try:
+                    # 如果文件不存在，创建一个新的配置字典
+                    if os.path.exists(config_path):
                         with open(config_path, 'r', encoding='utf-8') as f:
                             config_data = json.load(f)
-                        
-                        # 更新配置信息
-                        config_data['last_imported_share_code'] = share_code
-                        config_data['last_import_time'] = os.path.getmtime(deck_dir)
-                        
-                        with open(config_path, 'w', encoding='utf-8') as f:
-                            json.dump(config_data, f, ensure_ascii=False, indent=2)
-                    except Exception as e:
-                        print(f"保存配置失败: {str(e)}")
+                    else:
+                        config_data = {}
+                    
+                    # 更新配置信息
+                    config_data['last_imported_share_code'] = share_code
+                    config_data['last_import_time'] = os.path.getmtime(deck_dir)
+                    
+                    with open(config_path, 'w', encoding='utf-8') as f:
+                        json.dump(config_data, f, ensure_ascii=False, indent=2)
+                except Exception as e:
+                    print(f"保存配置失败: {str(e)}")
                 
                 # 刷新UI
                 self.parent.log_output.append(f"[分享] 已应用分享码，成功导入 {success_count} 张卡片")

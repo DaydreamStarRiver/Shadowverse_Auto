@@ -9,11 +9,12 @@ import json
 import os
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QLineEdit, 
-    QGroupBox, QGridLayout, QScrollArea, QMessageBox
+    QGroupBox, QGridLayout, QScrollArea, QMessageBox, QSizePolicy
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap
 from src.utils.resource_utils import resource_path
+from src.ui.utils.ui_utils import get_exe_dir
 
 class ConfigPage(QWidget):
     def __init__(self, parent=None):
@@ -22,19 +23,38 @@ class ConfigPage(QWidget):
         self.config_data = self.load_config()
         self.card_widgets = []
         self.init_ui()
+        
+        # 设置窗口拉伸策略
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     
     def init_ui(self):
+        # 设置整体背景色
+        self.setStyleSheet("background-color: #2D2D4A;")
+        
         main_layout = QVBoxLayout(self)
         main_layout.setSpacing(15)
+        main_layout.setContentsMargins(20, 20, 20, 20)
         
         # 标题
         title_label = QLabel("参数设置")
-        title_label.setStyleSheet("font-size: 20px; color: #88AAFF; font-weight: bold;")
+        title_label.setStyleSheet(
+            "font-size: 24px; color: #88AAFF; font-weight: bold;"
+            "padding: 10px; border-bottom: 2px solid #4A4A7F;"
+        )
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
         
-        # 拖拽速度设置
+        # 拖拽速度设置 - 添加框架容器和美化样式
         drag_group = QGroupBox("拖拽速度设置 (单位:秒)")
+        drag_group.setStyleSheet(
+            "QGroupBox {"
+            "    font-size: 14px; color: #88AAFF; font-weight: bold;"
+            "    background-color: rgba(40, 40, 70, 150);"
+            "    border-radius: 10px;"
+            "    border: 1px solid #5A5A8F;"
+            "    padding: 10px;"
+            "}"
+        )
         drag_layout = QGridLayout(drag_group)
         
         # 获取当前拖拽速度设置
@@ -42,22 +62,63 @@ class ConfigPage(QWidget):
         if "game" in self.config_data and "human_like_drag_duration_range" in self.config_data["game"]:
             drag_range = self.config_data["game"]["human_like_drag_duration_range"]
         
-        drag_layout.addWidget(QLabel("最小拖拽时间:"), 0, 0)
+        min_drag_label = QLabel("最小拖拽时间:")
+        min_drag_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        drag_layout.addWidget(min_drag_label, 0, 0)
         self.min_drag_input = QLineEdit(str(drag_range[0]))
-        self.min_drag_input.setStyleSheet("background-color: rgba(80, 80, 120, 180); color: white;")
+        self.min_drag_input.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: rgba(80, 80, 120, 180);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "    padding: 5px;"
+            "}"
+            "QLineEdit:focus {"
+            "    border: 2px solid #88AAFF;"
+            "    background-color: rgba(90, 90, 130, 180);"
+            "}"
+        )
         drag_layout.addWidget(self.min_drag_input, 0, 1)
         
-        drag_layout.addWidget(QLabel("最大拖拽时间:"), 1, 0)
+        max_drag_label = QLabel("最大拖拽时间:")
+        max_drag_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        drag_layout.addWidget(max_drag_label, 1, 0)
         self.max_drag_input = QLineEdit(str(drag_range[1]))
-        self.max_drag_input.setStyleSheet("background-color: rgba(80, 80, 120, 180); color: white;")
+        self.max_drag_input.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: rgba(80, 80, 120, 180);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "    padding: 5px;"
+            "}"
+            "QLineEdit:focus {"
+            "    border: 2px solid #88AAFF;"
+            "    background-color: rgba(90, 90, 130, 180);"
+            "}"
+        )
         drag_layout.addWidget(self.max_drag_input, 1, 1)
         
-        drag_layout.addWidget(QLabel("说明: 设置更小的值会使操作更快，但可能被检测为脚本"), 2, 0, 1, 2)
+        desc_label = QLabel("说明: 设置更小的值会使操作更快，但可能被检测为脚本")
+        desc_label.setStyleSheet("font-size: 12px; color: #AACCFF;")
+        drag_layout.addWidget(desc_label, 2, 0, 1, 2)
         
         main_layout.addWidget(drag_group)
         
-        # 卡片优先级设置
+        # 卡片优先级设置 - 添加框架容器和美化样式
         card_group = QGroupBox("卡片优先级设置")
+        card_group.setStyleSheet(
+            "QGroupBox {"
+            "    font-size: 14px; color: #88AAFF; font-weight: bold;"
+            "    background-color: rgba(40, 40, 70, 150);"
+            "    border-radius: 10px;"
+            "    border: 1px solid #5A5A8F;"
+            "    padding: 10px;"
+            "}"
+        )
         card_layout = QVBoxLayout(card_group)
         
         # 说明
@@ -65,21 +126,39 @@ class ConfigPage(QWidget):
         desc_label.setStyleSheet("font-size: 12px; color: #AACCFF;")
         card_layout.addWidget(desc_label)
         
-        # 滚动区域
+        # 滚动区域 - 美化样式
         scroll_area = QScrollArea()
         scroll_area.setWidgetResizable(True)
         self.scroll_content = QWidget()  # 保存为实例变量
         self.scroll_layout = QVBoxLayout(self.scroll_content)
         scroll_area.setWidget(self.scroll_content)
         
-        # 设置滚动区域样式
+        # 设置滚动区域样式 - 美化滚动条和边框
         scroll_area.setStyleSheet("""
             QScrollArea {
                 background-color: transparent;
-                border: none;
+                border: 1px solid #5A5A8F;
+                border-radius: 8px;
             }
             QWidget#ScrollContent {
                 background-color: transparent;
+            }
+            QScrollBar:vertical {
+                background-color: rgba(60, 60, 90, 150);
+                width: 12px;
+                margin: 0px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: rgba(100, 100, 150, 180);
+                min-height: 20px;
+                border-radius: 6px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: rgba(120, 120, 180, 180);
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
             }
         """)
         self.scroll_content.setObjectName("ScrollContent")
@@ -87,11 +166,43 @@ class ConfigPage(QWidget):
         card_layout.addWidget(scroll_area)
         main_layout.addWidget(card_group)
         
-        # 操作按钮
+        # 操作按钮 - 美化样式
         btn_layout = QHBoxLayout()
         self.save_btn = QPushButton("保存设置")
+        self.save_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #4A7AFF, stop:1 #3A5ACF);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5A8AFF, stop:1 #4A6ACF);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #3A6ACF, stop:1 #2A4ABF);"
+            "}"
+        )
         self.save_btn.clicked.connect(self.save_config)
         self.back_btn = QPushButton("返回主界面")
+        self.back_btn.setStyleSheet(
+            "QPushButton {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #6A6A9F, stop:1 #5A5A8F);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    padding: 8px 16px;"
+            "    border-radius: 5px;"
+            "    border: 1px solid #5A5A8F;"
+            "}"
+            "QPushButton:hover {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #7A7A9F, stop:1 #6A6A8F);"
+            "}"
+            "QPushButton:pressed {"
+            "    background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #5A5A8F, stop:1 #4A4A7F);"
+            "}"
+        )
         self.back_btn.clicked.connect(lambda: self.parent.stacked_widget.setCurrentIndex(0))
         
         btn_layout.addStretch()
@@ -207,38 +318,68 @@ class ConfigPage(QWidget):
             self.scroll_layout.addWidget(no_card_label)
             return
         
-        # 为每张卡片创建设置行
+        # 为每张卡片创建设置行 - 美化样式
         for card_file in card_files:
             # 解析卡片名称
             card_name = card_file.split('_', 1)[-1].rsplit('.', 1)[0]
             
-            # 创建卡片行控件
+            # 创建卡片行控件 - 添加悬停效果
             card_row = QWidget()
-            card_row.setStyleSheet("background-color: rgba(60, 60, 90, 150); border-radius: 10px;")
+            card_row.setStyleSheet(
+                "QWidget {"
+                "    background-color: rgba(60, 60, 90, 150);"
+                "    border-radius: 10px;"
+                "    border: 1px solid #5A5A8F;"
+                "}"
+                "QWidget:hover {"
+                "    background-color: rgba(70, 70, 100, 150);"
+                "    border: 1px solid #88AAFF;"
+                "}"
+            )
             row_layout = QHBoxLayout(card_row)
-            row_layout.setContentsMargins(10, 5, 10, 5)
+            row_layout.setContentsMargins(15, 10, 15, 10)
+            row_layout.setSpacing(15)
             
-            # 卡片图片
+            # 卡片图片 - 增大尺寸并添加阴影
             card_label = QLabel()
             card_path = resource_path(os.path.join("shadowverse_cards_cost", card_file))
             pixmap = QPixmap(card_path)
             if not pixmap.isNull():
-                pixmap = pixmap.scaled(80, 120, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+                pixmap = pixmap.scaled(100, 140, Qt.KeepAspectRatio, Qt.SmoothTransformation)
                 card_label.setPixmap(pixmap)
             card_label.setAlignment(Qt.AlignCenter)
+            card_label.setStyleSheet("border-radius: 5px;")
             row_layout.addWidget(card_label)
             
-            # 卡片名称
+            # 卡片名称 - 美化样式
             name_label = QLabel(card_name)
-            name_label.setStyleSheet("color: #FFFFFF; font-weight: bold; min-width: 120px;")
+            name_label.setStyleSheet(
+                "color: #FFFFFF; font-weight: bold; font-size: 14px; min-width: 120px;"
+            )
             name_label.setAlignment(Qt.AlignCenter)
             row_layout.addWidget(name_label)
             
-            # 出牌优先级
-            row_layout.addWidget(QLabel("出牌优先级:"))
+            # 出牌优先级 - 美化标签和输入框
+            priority_label = QLabel("出牌优先级:")
+            priority_label.setStyleSheet("color: #CCDDFF; font-size: 14px;")
+            row_layout.addWidget(priority_label)
             play_priority_input = QLineEdit()
-            play_priority_input.setStyleSheet("background-color: rgba(80, 80, 120, 180); color: white;")
-            play_priority_input.setMaximumWidth(50)
+            play_priority_input.setStyleSheet(
+                "QLineEdit {"
+                "    background-color: rgba(80, 80, 120, 180);"
+                "    color: white;"
+                "    font-size: 14px;"
+                "    border: 1px solid #5A5A8F;"
+                "    border-radius: 5px;"
+                "    padding: 5px;"
+                "    text-align: center;"
+                "}"
+                "QLineEdit:focus {"
+                "    border: 2px solid #88AAFF;"
+                "    background-color: rgba(90, 90, 130, 180);"
+                "}"
+            )
+            play_priority_input.setMaximumWidth(60)
             
             # 设置当前值（如果有）
             high_priority = self.config_data.get("high_priority_cards", {}).get(card_name, {})
@@ -248,11 +389,27 @@ class ConfigPage(QWidget):
                 play_priority_input.setText("")  # 确保为空
             row_layout.addWidget(play_priority_input)
             
-            # 进化优先级
-            row_layout.addWidget(QLabel("进化优先级:"))
+            # 进化优先级 - 美化标签和输入框
+            evolve_label = QLabel("进化优先级:")
+            evolve_label.setStyleSheet("color: #CCDDFF; font-size: 14px;")
+            row_layout.addWidget(evolve_label)
             evolve_priority_input = QLineEdit()
-            evolve_priority_input.setStyleSheet("background-color: rgba(80, 80, 120, 180); color: white;")
-            evolve_priority_input.setMaximumWidth(50)
+            evolve_priority_input.setStyleSheet(
+                "QLineEdit {"
+                "    background-color: rgba(80, 80, 120, 180);"
+                "    color: white;"
+                "    font-size: 14px;"
+                "    border: 1px solid #5A5A8F;"
+                "    border-radius: 5px;"
+                "    padding: 5px;"
+                "    text-align: center;"
+                "}"
+                "QLineEdit:focus {"
+                "    border: 2px solid #88AAFF;"
+                "    background-color: rgba(90, 90, 130, 180);"
+                "}"
+            )
+            evolve_priority_input.setMaximumWidth(60)
             
             # 设置当前值（如果有）
             evolve_priority = self.config_data.get("evolve_priority_cards", {}).get(card_name, {})
