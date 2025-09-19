@@ -108,6 +108,73 @@ class ConfigPage(QWidget):
         
         main_layout.addWidget(drag_group)
         
+        # 窗口大小设置 - 添加框架容器和美化样式
+        window_size_group = QGroupBox("窗口大小设置 (单位:像素)")
+        window_size_group.setStyleSheet(
+            "QGroupBox {"
+            "    font-size: 14px; color: #88AAFF; font-weight: bold;"
+            "    background-color: rgba(40, 40, 70, 150);"
+            "    border-radius: 10px;"
+            "    border: 1px solid #5A5A8F;"
+            "    padding: 10px;"
+            "}"
+        )
+        window_size_layout = QGridLayout(window_size_group)
+        
+        # 获取当前窗口大小设置
+        window_width = 1200  # 默认值
+        window_height = 1000  # 默认值
+        if "window" in self.config_data and "width" in self.config_data["window"]:
+            window_width = self.config_data["window"]["width"]
+        if "window" in self.config_data and "height" in self.config_data["window"]:
+            window_height = self.config_data["window"]["height"]
+        
+        width_label = QLabel("窗口宽度:")
+        width_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        window_size_layout.addWidget(width_label, 0, 0)
+        self.window_width_input = QLineEdit(str(window_width))
+        self.window_width_input.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: rgba(80, 80, 120, 180);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "    padding: 5px;"
+            "}"
+            "QLineEdit:focus {"
+            "    border: 2px solid #88AAFF;"
+            "    background-color: rgba(90, 90, 130, 180);"
+            "}"
+        )
+        window_size_layout.addWidget(self.window_width_input, 0, 1)
+        
+        height_label = QLabel("窗口高度:")
+        height_label.setStyleSheet("font-size: 14px; color: #CCDDFF;")
+        window_size_layout.addWidget(height_label, 1, 0)
+        self.window_height_input = QLineEdit(str(window_height))
+        self.window_height_input.setStyleSheet(
+            "QLineEdit {"
+            "    background-color: rgba(80, 80, 120, 180);"
+            "    color: white;"
+            "    font-size: 14px;"
+            "    border: 1px solid #5A5A8F;"
+            "    border-radius: 5px;"
+            "    padding: 5px;"
+            "}"
+            "QLineEdit:focus {"
+            "    border: 2px solid #88AAFF;"
+            "    background-color: rgba(90, 90, 130, 180);"
+            "}"
+        )
+        window_size_layout.addWidget(self.window_height_input, 1, 1)
+        
+        window_size_desc = QLabel("说明: 设置窗口的宽度和高度，设置后需要重启应用生效")
+        window_size_desc.setStyleSheet("font-size: 12px; color: #AACCFF;")
+        window_size_layout.addWidget(window_size_desc, 2, 0, 1, 2)
+        
+        main_layout.addWidget(window_size_group)
+        
         # 卡片优先级设置 - 添加框架容器和美化样式
         card_group = QGroupBox("卡片优先级设置")
         card_group.setStyleSheet(
@@ -223,6 +290,10 @@ class ConfigPage(QWidget):
                     float(self.min_drag_input.text()),
                     float(self.max_drag_input.text())
                 ]
+            },
+            "window": {
+                "width": int(self.window_width_input.text()),
+                "height": int(self.window_height_input.text())
             }
         }
         
@@ -450,6 +521,25 @@ class ConfigPage(QWidget):
             QMessageBox.warning(self, "输入错误", f"拖拽时间设置错误: {str(e)}")
             return
         
+        # 验证并保存窗口大小设置
+        try:
+            window_width = int(self.window_width_input.text())
+            window_height = int(self.window_height_input.text())
+            
+            if window_width < 800 or window_height < 600:
+                raise ValueError("窗口宽度不能小于800，高度不能小于600")
+            if window_width > 3840 or window_height > 2160:
+                raise ValueError("窗口宽度不能大于3840，高度不能大于2160")
+            
+            # 更新配置数据
+            if "window" not in self.config_data:
+                self.config_data["window"] = {}
+            self.config_data["window"]["width"] = window_width
+            self.config_data["window"]["height"] = window_height
+        except Exception as e:
+            QMessageBox.warning(self, "输入错误", f"窗口大小设置错误: {str(e)}")
+            return
+        
         # 准备卡片优先级设置
         high_priority_cards = {}
         evolve_priority_cards = {}
@@ -491,22 +581,22 @@ class ConfigPage(QWidget):
         # 更新配置数据
         if high_priority_cards:
             self.config_data["high_priority_cards"] = high_priority_cards
-        elif "high_priority_cards" in self.config_data:
+        elif "high_priority_cards" 在 self.config_data:
             del self.config_data["high_priority_cards"]
         
         if evolve_priority_cards:
             self.config_data["evolve_priority_cards"] = evolve_priority_cards
-        elif "evolve_priority_cards" in self.config_data:
+        elif "evolve_priority_cards" 在 self.config_data:
             del self.config_data["evolve_priority_cards"]
         
         # 保存到文件
-        config_path = os.path.join(get_exe_dir(), "config.json")
+        config_path = os.path.join(get_exe_dir()， "config.json")
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4, ensure_ascii=False)
             
             QMessageBox.information(self, "成功", "配置已保存！")
-            self.parent.log_output.append("[配置] 参数设置已更新")
+            self.parent.log_output。append("[配置] 参数设置已更新")
         except Exception as e:
             QMessageBox.warning(self, "保存失败", f"保存配置文件时出错: {str(e)}")
     
@@ -521,6 +611,16 @@ class ConfigPage(QWidget):
             drag_range = self.config_data["game"]["human_like_drag_duration_range"]
         self.min_drag_input.setText(str(drag_range[0]))
         self.max_drag_input.setText(str(drag_range[1]))
+        
+        # 刷新窗口大小设置
+        window_width = 1200  # 默认值
+        window_height = 1000  # 默认值
+        if "window" in self.config_data and "width" in self.config_data["window"]:
+            window_width = self.config_data["window"]["width"]
+        if "window" in self.config_data and "height" in self.config_data["window"]:
+            window_height = self.config_data["window"]["height"]
+        self.window_width_input.setText(str(window_width))
+        self.window_height_input.setText(str(window_height))
         
         # 刷新卡片优先级设置
         self.load_card_priority_settings(self.scroll_content)
