@@ -122,7 +122,16 @@ python shadowverse_auto_ui.py
 - 开发者不对使用本工具造成的任何后果负责
 
 ## 更新日志
+Shadowverse Automation(2025/9/18)
 - 优化了设备连接逻辑，解决了`'AdbClient' object is not callable`错误
 - 修复了暂停/恢复功能，确保UI和脚本之间能正确传递命令
 - 重构了UI代码，提高了可维护性和扩展性
 - 增强了异常处理，添加了详细的错误追踪信息
+
+Shadowverse Automation(2025/9/19)
+- 优化了UI，重构了部分UI
+- 优化了配置保存逻辑，确保config.json不存在时能创建新配置字典
+- 修复了卡组保存功能，添加quanka目录创建和save_time字段记录保存时间
+- 优化了卡组加载功能，重构load_saved_deck方法，修复缩进错误，提高卡片查找效率
+- 增强了错误处理，添加了详细的调试信息输出
+- 修复了卡片查找逻辑的缩进问题，确保代码结构正确
