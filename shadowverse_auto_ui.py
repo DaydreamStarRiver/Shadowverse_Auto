@@ -8,6 +8,7 @@ Shadowverse Automation UI 主程序入口
 import sys
 import os
 import logging
+import queue
 
 # 添加src目录到系统路径
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
@@ -15,18 +16,16 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src'))
 from src.ui import ShadowverseUI, load_custom_font
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
+from main import setup_logging as setup_main_logging, log_queue  # 使用别名导入日志设置函数和日志队列
 
 def setup_logging():
-    """设置基础日志系统"""
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler("ui_log.log", encoding='utf-8'),
-            logging.StreamHandler()
-        ]
-    )
-    return logging.getLogger("ShadowverseAutoUI")
+    """设置基础日志系统，使用main.py中的配置并连接到日志队列"""
+    from src.config import ConfigManager
+    config_manager = ConfigManager()
+    
+    # 使用main.py中的setup_logging函数并传入log_queue
+    logger = setup_main_logging(config_manager.config, log_queue)
+    return logger
 
 if __name__ == "__main__":
     # 设置日志
