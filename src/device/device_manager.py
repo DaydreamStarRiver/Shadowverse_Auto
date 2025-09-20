@@ -6,7 +6,7 @@
 import threading
 import logging
 import time
-from adbutils import adb
+from adbutils import device
 import cv2
 import numpy as np
 import os
@@ -40,6 +40,36 @@ class DeviceManager:
         
         logger.info(f"发现 {len(devices)} 个设备配置")
         
+        # 优先启动标记为全局默认的设备
+        global_device = None
+        for device_config in devices:
+            if device_config.get("is_global", False):
+                global_device = device_config
+                break
+        
+        # 如果找到全局默认设备，只启动这个设备
+        if global_device:
+            serial = global_device.get("serial")
+            if serial:
+                logger.info(f"优先启动全局默认设备: {serial}")
+                
+                # 创建设备状态
+                device_state = DeviceState(serial, self.config_manager.config, global_device)
+                self.device_states[serial] = device_state
+                
+                # 启动设备工作线程
+                thread = threading.Thread(
+                    target=self._device_worker,
+                    args=(global_device, device_state),
+                    daemon=True
+                )
+                thread.start()
+                self.device_threads[serial] = thread
+                
+                logger.info(f"已启动设备线程: {serial}")
+                return
+        
+        # 如果没有全局默认设备，启动所有设备
         for device_config in devices:
             serial = device_config.get("serial")
             if not serial:
@@ -99,25 +129,18 @@ class DeviceManager:
 
         for attempt in range(1, max_retries + 1):
             try:
-                import os
                 from adbutils import adb
                 import uiautomator2 as u2
                 
-                # 使用虚拟环境中的ADB工具路径
-                adb_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "shadowverse_automation", ".venv", "Lib", "site-packages", "adbutils", "binaries", "adb.exe")
-                
-                # 设置环境变量，确保uiautomator2也能找到ADB工具
-                os.environ['ANDROID_HOME'] = os.path.dirname(adb_path)
-                os.environ['PATH'] = os.path.dirname(adb_path) + os.pathsep + os.environ.get('PATH', '')
-                
-                # 使用uiautomator2直接连接设备
-                u2_device = u2.connect(serial)
-                if u2_device is None:
+                # 直接连接设备
+                adb_device = adb.device(serial)
+                if adb_device is None:
                     raise RuntimeError(f"无法连接设备: {serial}")
-                
-                # 将u2_device同时赋值给adb_device，因为它们有类似的接口
+
+                # 同时返回 u2 设备对象
+                u2_device = u2.connect(serial)
                 device_state.u2_device = u2_device
-                device_state.adb_device = u2_device
+                device_state.adb_device = adb_device
                 
                 logger.info(f"已连接设备: {serial}")
                 return True

@@ -1,5 +1,19 @@
 {
-  "server": "intl",
-  "adb_port": "127.0.0.1:16384",
-  "dark_mode": false
+  "server": "cn",
+  "adb_port": "127.0.0.1:16416",
+  "dark_mode": false,
+  "devices": [
+    {
+      "name": "设备-127.0.0.1:16416",
+      "serial": "127.0.0.1:16416",
+      "is_global": true,
+      "screenshot_deep_color": false
+    },
+    {
+      "name": "设备-127.0.0.1:16384",
+      "serial": "127.0.0.1:16384",
+      "is_global": false,
+      "screenshot_deep_color": false
+    }
+  ]
 }

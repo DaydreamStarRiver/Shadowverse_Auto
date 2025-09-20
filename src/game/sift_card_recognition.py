@@ -25,9 +25,7 @@ class SiftCardRecognition:
         Args:
             card_images_dir: 卡牌图片目录路径
         """
-        # 使用绝对路径加载卡牌模板
-        import os
-        self.card_images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), card_images_dir)
+        self.card_images_dir = card_images_dir
         self.card_templates = {}  # 缓存卡牌模板
         self.sift = cv2.SIFT_create()
         self.scale_factor = 0.3  # 缩放因子（匹配游戏中卡牌的实际大小）
@@ -275,4 +273,4 @@ class SiftCardRecognition:
             Dict[str, int]: 卡牌名称到费用的映射
         """
         return {template_info['name']: template_info['cost'] 
-                for template_info in self.card_templates.values()}
+                for template_info in self.card_templates.values()} 

@@ -581,22 +581,22 @@ class ConfigPage(QWidget):
         # 更新配置数据
         if high_priority_cards:
             self.config_data["high_priority_cards"] = high_priority_cards
-        elif "high_priority_cards" 在 self.config_data:
+        elif "high_priority_cards" in self.config_data:
             del self.config_data["high_priority_cards"]
         
         if evolve_priority_cards:
             self.config_data["evolve_priority_cards"] = evolve_priority_cards
-        elif "evolve_priority_cards" 在 self.config_data:
+        elif "evolve_priority_cards" in self.config_data:
             del self.config_data["evolve_priority_cards"]
         
         # 保存到文件
-        config_path = os.path.join(get_exe_dir()， "config.json")
+        config_path = os.path.join(get_exe_dir(), "config.json")
         try:
             with open(config_path, 'w', encoding='utf-8') as f:
                 json.dump(self.config_data, f, indent=4, ensure_ascii=False)
             
             QMessageBox.information(self, "成功", "配置已保存！")
-            self.parent.log_output。append("[配置] 参数设置已更新")
+            self.parent.log_output.append("[配置] 参数设置已更新")
         except Exception as e:
             QMessageBox.warning(self, "保存失败", f"保存配置文件时出错: {str(e)}")
     

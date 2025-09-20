@@ -11,12 +11,13 @@ import json
 import time
 import threading
 import queue
-from main import command_queue  # 导入全局命令队列
+from main import command_queue, log_queue  # 导入全局命令队列和日志队列
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
     QPushButton, QTabWidget, QStackedWidget, QTextEdit, QLineEdit, QCheckBox,
     QComboBox, QMessageBox
 )
+from PyQt5.QtCore import pyqtSignal, QObject
 from PyQt5.QtCore import Qt, QTimer, QPoint
 from PyQt5.QtGui import QFont, QIcon, QPixmap, QClipboard, QBrush
 
@@ -28,6 +29,10 @@ from src.ui.pages.share_page import SharePage
 from src.ui.utils.ui_utils import get_exe_dir, load_custom_font
 from src.ui.notification_manager import NotificationManager
 
+class LogEmitter(QObject):
+    """日志信号发射器"""
+    log_message = pyqtSignal(str)
+
 class LogListener(threading.Thread):
     """日志监听线程"""
     def __init__(self, log_output, interval=1):
@@ -35,11 +40,18 @@ class LogListener(threading.Thread):
         self.log_output = log_output
         self.interval = interval
         self.running = True
+        self.emitter = LogEmitter()
 
     def run(self):
         while self.running:
-            time.sleep(self.interval)
-            # 实际项目中可以在这里实现日志文件监听
+            try:
+                # 尝试从日志队列获取消息，设置超时以不阻塞
+                msg = log_queue.get(timeout=self.interval)
+                # 使用信号发送日志消息，避免在子线程中直接更新UI
+                self.emitter.log_message.emit(msg)
+                log_queue.task_done()
+            except queue.Empty:
+                pass
 
     def stop(self):
         self.running = False
@@ -123,6 +135,7 @@ class ShadowverseUI(QMainWindow):
         self.start_time = 0
         # 窗口调整大小功能已禁用
         self.dragging = False  # 仅保留窗口拖动功能
+        self.current_device = None  # 存储当前连接的设备
         self.setup_ui()
         
         # 加载示例运行日志
@@ -280,6 +293,7 @@ class ShadowverseUI(QMainWindow):
         
         # 启动日志监听
         self.log_listener = LogListener(self.log_output)
+        self.log_listener.emitter.log_message.connect(self.append_log)
         self.log_listener.start()
 
     def setup_main_page(self):
@@ -540,7 +554,8 @@ class ShadowverseUI(QMainWindow):
 
     def load_current_config(self):
         """加载当前配置"""
-        config_path = os.path.join(get_exe_dir(), "config.json")
+        # 使用项目根目录的config.json，与connect_device方法保持一致
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "config.json")
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
@@ -604,26 +619,124 @@ class ShadowverseUI(QMainWindow):
             
             # 实际测试ADB连接
             try:
-                # 使用虚拟环境中的ADB工具路径
+                # 尝试多种ADB工具路径，确保在不同环境下都能找到
                 import os
-                adb_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "shadowverse_automation", ".venv", "Lib", "site-packages", "adbutils", "binaries", "adb.exe")
+                import sys
+                from src.utils.resource_utils import resource_path
+                
+                adb_candidates = [
+                    # 1. 首先尝试直接在程序根目录寻找adb.exe（我们手动复制的位置）
+                    os.path.join(os.path.dirname(sys.executable), 'adb.exe') if hasattr(sys, '_MEIPASS') else os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'adb.exe'),
+                    # 2. 使用resource_utils中的resource_path函数查找
+                    resource_path("adbutils/binaries/adb.exe"),
+                    resource_path("_internal/adbutils/binaries/adb.exe"),
+                    # 3. 回退到原始的虚拟环境路径
+                    os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "shadowverse_automation", ".venv", "Lib", "site-packages", "adbutils", "binaries", "adb.exe")
+                ]
+                
+                # 找到第一个存在的ADB路径
+                adb_path = None
+                for candidate in adb_candidates:
+                    if os.path.exists(candidate):
+                        adb_path = candidate
+                        break
+                
+                if adb_path is None:
+                    # 如果都找不到，尝试使用系统环境变量中的ADB（作为最后的备选）
+                    try:
+                        # 使用which命令查找系统中的adb
+                        import subprocess
+                        if sys.platform == 'win32':
+                            result = subprocess.run(['where', 'adb'], capture_output=True, text=True)
+                        else:
+                            result = subprocess.run(['which', 'adb'], capture_output=True, text=True)
+                        if result.returncode == 0:
+                            adb_path = result.stdout.strip().split('\n')[0]
+                    except:
+                        pass
+                    
+                    if adb_path is None:
+                        raise FileNotFoundError("未找到ADB工具，请检查路径配置")
                 
                 # 使用adb命令测试连接
                 result = subprocess.run([adb_path, 'connect', serial], capture_output=True, text=True, timeout=5)
                 if "connected to" in result.stdout or "already connected" in result.stdout:
                     # 连接成功
+                    self.current_device = serial  # 保存当前连接的设备
                     self.update_status("已连接")
                     self.append_log(f"[系统] 已成功连接设备（{serial}）")
                     
-                    # 保存配置
-                    config_path = os.path.join(get_exe_dir(), "config.json")
-                    config_data = {
-                        'server': self.server_combo.currentData(),
-                        'adb_port': serial,  # 保存完整的IP:端口格式
-                        'dark_mode': self.dark_mode_check.isChecked()
-                    }
+                    # 更新配置而不是覆盖整个文件
+                    # 使用项目根目录的config.json，而不是src目录下的
+                    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "config.json")
+                    
+                    # 先读取现有配置
+                    existing_config = {}
+                    if os.path.exists(config_path):
+                        try:
+                            with open(config_path, 'r', encoding='utf-8') as f:
+                                existing_config = json.load(f)
+                        except:
+                            pass
+                    
+                    # 确保devices数组存在
+                    if 'devices' not in existing_config:
+                        existing_config['devices'] = []
+                    
+                    # 获取用户选择的服务器
+                    selected_server = self.server_combo.currentData()
+                    
+                    # 检查是否已存在相同的设备配置
+                    device_exists = False
+                    for i, device in enumerate(existing_config['devices']):
+                        if device.get('serial') == serial:
+                            # 更新现有设备配置
+                            existing_config['devices'][i] = {
+                                'name': f"设备-{serial}",
+                                'serial': serial,
+                                'is_global': False,
+                                'screenshot_deep_color': False,
+                                'is_cn_server': (selected_server == 'cn')
+                            }
+                            device_exists = True
+                            break
+                    
+                    # 如果设备不存在，添加新设备配置
+                    if not device_exists:
+                        existing_config['devices'].append({
+                            'name': f"设备-{serial}",
+                            'serial': serial,
+                            'is_global': False,
+                            'screenshot_deep_color': False,
+                            'is_cn_server': (selected_server == 'cn')
+                        })
+                    
+                    # 将当前连接的设备设置为默认设备（移动到设备列表的第一个位置）
+                    # 首先移除当前设备（如果存在）
+                    existing_config['devices'] = [d for d in existing_config['devices'] if d.get('serial') != serial]
+                    # 然后添加到列表开头
+                    existing_config['devices'].insert(0, {
+                        'name': f"设备-{serial}",
+                        'serial': serial,
+                        'is_global': True,  # 设置为全局默认设备
+                        'screenshot_deep_color': False,
+                        'is_cn_server': (selected_server == 'cn')
+                    })
+                    
+                    # 为每个设备配置明确设置服务器类型
+                    for device in existing_config['devices']:
+                        device['is_cn_server'] = (selected_server == 'cn')
+                    
+                    # 更新其他必要配置
+                    existing_config['server'] = selected_server
+                    existing_config['dark_mode'] = self.dark_mode_check.isChecked()
+                    
+                    # 保存更新后的配置
                     with open(config_path, 'w', encoding='utf-8') as f:
-                        json.dump(config_data, f, ensure_ascii=False, indent=2)
+                        json.dump(existing_config, f, ensure_ascii=False, indent=2)
+                    
+                    # 记录日志
+                    self.append_log(f"[系统] 设备 {serial} 连接成功，已选择{'国服' if selected_server == 'cn' else '国际服'}配置")
                     
                     QMessageBox.information(self, "连接成功", f"已成功连接设备（{serial}）")
                 else:
@@ -662,10 +775,15 @@ class ShadowverseUI(QMainWindow):
             return
         
         if self.script_runner is None or not self.script_runner.running:
+            # 启动脚本运行线程
             self.script_runner = ScriptRunner(self)
             self.script_runner.start()
             self.start_time = time.time()
             self.append_log("[脚本] 已启动")
+            
+            # 如果有当前连接的设备，确保它被正确启动
+            if self.current_device:
+                self.append_log(f"[系统] 将使用设备: {self.current_device}")
 
     def pause_script(self):
         """暂停脚本"""
@@ -752,6 +870,16 @@ class ShadowverseUI(QMainWindow):
 if __name__ == "__main__":
     # 设置中文字体支持
     load_custom_font()
+    
+    # 初始化配置管理器和日志系统
+    from src.config import ConfigManager
+    from main import setup_logging
+    config_manager = ConfigManager()
+    
+    # 设置日志系统
+    logger = setup_logging(config_manager.config, log_queue)
+    logger.info("=== 影之诗自动对战脚本启动 ===")
+    logger.info("使用UI界面运行")
     
     app = QApplication(sys.argv)
     window = ShadowverseUI()

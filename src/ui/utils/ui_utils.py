@@ -14,11 +14,12 @@ FONT_PATH = "猫啃什锦黑.otf"
 BACKGROUND_IMAGE = "Image/ui背景.jpg"  # 背景图片路径
 
 def get_exe_dir():
-    """获取 EXE 所在目录（打包后）或脚本目录（直接运行 .py 时）"""
+    """获取 EXE 所在目录（打包后）或项目根目录（直接运行 .py 时）"""
     if getattr(sys, 'frozen', False):  # 检查是否打包
         return os.path.dirname(sys.executable)  # EXE 所在目录
     else:
-        return os.path.dirname(os.path.abspath(__file__))  # 脚本所在目录
+        # 返回项目根目录（向上3级目录）
+        return os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 创建自定义字体
 def load_custom_font(size=10):

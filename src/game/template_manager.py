@@ -19,8 +19,9 @@ class TemplateManager:
     def __init__(self, device_config: Optional[Dict[str, Any]] = None):
         self.device_config = device_config or {}
         # 根据设备配置选择模板目录
-        is_global = self.device_config.get('is_global', False)
-        self.templates_dir = "templates_global" if is_global else "templates"
+        # 使用is_cn_server标志而不是is_global，避免与全局默认设备标记混淆
+        is_cn_server = self.device_config.get('is_cn_server', False)
+        self.templates_dir = "templates" if is_cn_server else "templates_global"
         self.templates: Dict[str, Dict[str, Any]] = {}
         self.evolution_template = None
         self.super_evolution_template = None
@@ -218,4 +219,4 @@ class TemplateManager:
         evolution_info = self.load_super_evolution_template()
         if not evolution_info:
             return None, 0
-        return self.match_template(screenshot, evolution_info) 
+        return self.match_template(screenshot, evolution_info)
