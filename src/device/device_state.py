@@ -128,8 +128,21 @@ class DeviceState:
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
         
-        # 设置不向上传递，避免重复输出
-        logger.propagate = False
+        # 从main模块导入全局日志队列
+        try:
+            from main import log_queue
+            from main import QueueHandler
+            # 添加队列处理器，让设备日志也能显示在UI中
+            queue_handler = QueueHandler(log_queue)
+            queue_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            queue_handler.setFormatter(queue_formatter)
+            logger.addHandler(queue_handler)
+        except ImportError:
+            # 如果无法导入main模块，则跳过队列处理器
+            pass
+            
+        # 保持propagate为True，让日志能向上传递到根日志器
+        logger.propagate = True
 
         return logger
 
@@ -464,4 +477,4 @@ class DeviceState:
             "duration": f"{int(hours)}小时{int(minutes)}分钟{int(seconds)}秒",
             "matches_completed": self.current_run_matches,
             "serial": self.serial
-        } 
+        }

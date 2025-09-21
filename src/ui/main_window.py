@@ -136,6 +136,10 @@ class ShadowverseUI(QMainWindow):
         # 窗口调整大小功能已禁用
         self.dragging = False  # 仅保留窗口拖动功能
         self.current_device = None  # 存储当前连接的设备
+        
+        # 显示启动弹窗
+        self.show_startup_dialog()
+        
         self.setup_ui()
         
         # 加载示例运行日志
@@ -521,13 +525,13 @@ class ShadowverseUI(QMainWindow):
     def set_background(self):
         """设置窗口背景"""
         # 尝试加载背景图片
-        current_dir = os.path.dirname(os.path.abspath(__file__))  # src/ui目录
-        project_root = os.path.dirname(os.path.dirname(current_dir))
-        bg_path = os.path.join(project_root, "Image", "background.jpg")
+        from src.ui.utils.ui_utils import get_exe_dir
+        exe_dir = get_exe_dir()
+        bg_path = os.path.join(exe_dir, "Image", "background.jpg")
         
         # 添加调试信息
         print(f"调试: 当前文件路径: {os.path.abspath(__file__)}")
-        print(f"调试: 计算的项目根目录: {project_root}")
+        print(f"调试: 可执行文件目录: {exe_dir}")
         print(f"调试: 背景图片路径: {bg_path}")
         print(f"调试: 背景图片文件存在: {os.path.exists(bg_path)}")
         
@@ -554,8 +558,8 @@ class ShadowverseUI(QMainWindow):
 
     def load_current_config(self):
         """加载当前配置"""
-        # 使用项目根目录的config.json，与connect_device方法保持一致
-        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "config.json")
+        # 使用可执行文件目录的config.json，确保打包后也能正确读取
+        config_path = os.path.join(get_exe_dir(), "config.json")
         if os.path.exists(config_path):
             try:
                 with open(config_path, 'r', encoding='utf-8') as f:
@@ -667,8 +671,8 @@ class ShadowverseUI(QMainWindow):
                     self.append_log(f"[系统] 已成功连接设备（{serial}）")
                     
                     # 更新配置而不是覆盖整个文件
-                    # 使用项目根目录的config.json，而不是src目录下的
-                    config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "config.json")
+                    # 使用可执行文件目录的config.json，确保打包后也能正确写入
+                    config_path = os.path.join(get_exe_dir(), "config.json")
                     
                     # 先读取现有配置
                     existing_config = {}
@@ -865,6 +869,35 @@ class ShadowverseUI(QMainWindow):
             self.notification_manager.stop()
         
         event.accept()
+
+    def show_startup_dialog(self):
+        """显示启动弹窗"""
+        # 创建自定义消息框
+        dialog = QMessageBox()
+        dialog.setWindowTitle("免责声明")
+        dialog.setIcon(QMessageBox.Information)
+        
+        # 构建HTML内容，设置不同颜色和字体样式
+        message = ""
+        message += "<p><span style='color: red; font-weight: bold; font-size: 14pt;'>免责声明</span></p>"
+        message += "<p><span style='color: red;'>本工具仅供学习和研究使用，请勿用于任何商业用途</span></p>"
+        message += "<p><span style='color: red;'>使用本工具可能违反游戏的用户协议，请谨慎使用</span></p>"
+        message += "<p><span style='color: red;'>开发者不对使用本工具造成的任何后果负责</span></p>"
+        message += "<p><span style='color: red; font-weight: bold;'>本工具属于免费发布，禁止任何形式倒卖！！！</span></p>"
+        message += "<p><span style='color: blue;'>工具交流开发群：892100160</span></p>"
+        message += "<p><span style='color: blue;'>工具交流开发群：967632615</span></p>"
+        
+        dialog.setTextFormat(Qt.RichText)
+        dialog.setText(message)
+        
+        # 只显示确定按钮
+        dialog.setStandardButtons(QMessageBox.Ok)
+        
+        # 居中显示
+        dialog.setWindowModality(Qt.ApplicationModal)
+        
+        # 执行弹窗
+        dialog.exec_()
 
 # 主程序入口
 if __name__ == "__main__":

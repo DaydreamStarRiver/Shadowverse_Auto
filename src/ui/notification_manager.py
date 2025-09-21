@@ -3,8 +3,28 @@
 处理用户通知和界面交互
 """
 
-import tkinter as tk
-from tkinter import messagebox
+"""
+通知管理器
+处理用户通知和界面交互
+在打包为 exe 的环境中未必包含 tkinter，因此这里使用可选导入策略：
+- 优先使用 PyQt5.QtWidgets.QMessageBox（若可用）
+- 然后尝试 tkinter（如果存在）
+- 最后回退到 ctypes 的 MessageBox 或控制台输出
+"""
+
+try:
+    from PyQt5.QtWidgets import QMessageBox, QApplication
+    _HAS_PYQT = True
+except Exception:
+    _HAS_PYQT = False
+
+try:
+    import tkinter as tk
+    from tkinter import messagebox
+    _HAS_TK = True
+except Exception:
+    _HAS_TK = False
+
 import ctypes
 import logging
 import queue
@@ -58,7 +78,13 @@ class NotificationManager:
                     break
                 
                 title, message = notification
-                self._show_tkinter_notification(title, message)
+                # Prefer PyQt notification when available (running inside Qt app)
+                if _HAS_PYQT:
+                    self._show_pyqt_notification(title, message)
+                elif _HAS_TK:
+                    self._show_tkinter_notification(title, message)
+                else:
+                    self._show_fallback_notification(title, message)
                 self.notification_queue.task_done()
                 
             except queue.Empty:
@@ -84,6 +110,32 @@ class NotificationManager:
             logger.error(f"显示Tkinter通知失败: {str(e)}")
             # 回退到传统弹窗
             self._show_fallback_notification(title, message)
+
+    def _show_pyqt_notification(self, title: str, message: str):
+        """使用 PyQt5 的 QMessageBox 显示通知（如果在 Qt 应用上下文中）。"""
+        try:
+            # If there's an existing QApplication, use it; otherwise create a temporary one.
+            app = QApplication.instance()
+            own_app = False
+            if app is None:
+                app = QApplication([])
+                own_app = True
+
+            msg = QMessageBox()
+            msg.setWindowTitle(title)
+            msg.setText(message)
+            msg.setIcon(QMessageBox.Information)
+            msg.exec_()
+
+            if own_app:
+                app.quit()
+        except Exception as e:
+            logger.error(f"显示PyQt通知失败: {str(e)}")
+            # 回退
+            if _HAS_TK:
+                self._show_tkinter_notification(title, message)
+            else:
+                self._show_fallback_notification(title, message)
     
     def _show_fallback_notification(self, title: str, message: str):
         """回退通知方法"""
