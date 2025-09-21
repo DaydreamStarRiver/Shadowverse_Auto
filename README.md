@@ -141,3 +141,9 @@ Shadowverse Automation(2025/9/21)
 - 引入了明确的'is_cn_server'标志来区分国服和国际服配置，避免与'is_global'（用于标记全局默认设备）混淆
 - 修改了template_manager.py和game_manager.py中的模板加载逻辑，使用'is_cn_server'标志正确选择模板目录
 - 优化了配置保存逻辑，确保在连接设备时正确设置所有设备的服务器配置
+
+Shadowverse Automation(2025/9/22)
+- 修复了打包后exe文件无法正确更新config.json的问题：统一使用get_exe_dir()函数获取可执行文件目录路径
+- 修改了main_window.py中的load_current_config和connect_device方法，将硬编码的多层os.path.dirname调用替换为get_exe_dir()函数
+- 更新了PyInstaller打包配置，包含uiautomator2的assets资源文件（u2.jar等）
+- 解决了uiautomator2初始化时"Resource assets/u2.jar not found"错误，确保设备连接初始化成功
