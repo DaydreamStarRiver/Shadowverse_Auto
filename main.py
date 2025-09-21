@@ -20,7 +20,7 @@ os.environ["PIN_MEMORY"] = "false"
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.config import ConfigManager
-from src.utils import setup_gpu, display_disclaimer_and_get_consent
+from src.utils import setup_gpu
 from src.device import DeviceManager
 from src.ui import NotificationManager
 from src.utils.gpu_utils import get_easyocr_reader
@@ -139,10 +139,7 @@ def main(enable_command_listener=True):
         logger = setup_logging(config_manager.config, log_queue)
         logger.info("=== 影之诗自动对战脚本启动 ===")
         
-        # 显示免责声明并获取用户同意
-        if not display_disclaimer_and_get_consent():
-            logger.info("用户未同意免责声明，程序退出")
-            return
+        # 程序已修改为无需用户同意即可使用
         
         # 设置GPU
         gpu_enabled = setup_gpu()
