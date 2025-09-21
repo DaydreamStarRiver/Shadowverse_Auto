@@ -38,7 +38,7 @@ DISCLAIMER = """
 
 # ============================= 默认配置 =============================
 DEFAULT_CONFIG = {
-    "adb_port": 5037,
+    "adb_port": 16384,
     "extra_templates_dir": "extra_templates",
     "auto_restart": {
         "enabled": True,
