@@ -122,13 +122,13 @@ python shadowverse_auto_ui.py
 - 开发者不对使用本工具造成的任何后果负责
 
 ## 更新日志
-Shadowverse Automation(2025/9/18)
+### Shadowverse Automation(2025/9/18)
 - 优化了设备连接逻辑，解决了`'AdbClient' object is not callable`错误
 - 修复了暂停/恢复功能，确保UI和脚本之间能正确传递命令
 - 重构了UI代码，提高了可维护性和扩展性
 - 增强了异常处理，添加了详细的错误追踪信息
 
-Shadowverse Automation(2025/9/19)
+### Shadowverse Automation(2025/9/19)
 - 优化了UI，重构了部分UI，更新了窗口大小调整设置
 - 优化了配置保存逻辑，确保config.json不存在时能创建新配置字典
 - 修复了卡组保存功能，添加quanka目录创建和save_time字段记录保存时间
@@ -136,13 +136,13 @@ Shadowverse Automation(2025/9/19)
 - 增强了错误处理，添加了详细的调试信息输出
 - 修复了卡片查找逻辑的缩进问题，确保代码结构正确
 
-Shadowverse Automation(2025/9/21)
+### Shadowverse Automation(2025/9/21)
 - 修复了服务器切换功能问题：选择国服并连接设备运行后实际使用的却是国际服配置
 - 引入了明确的'is_cn_server'标志来区分国服和国际服配置，避免与'is_global'（用于标记全局默认设备）混淆
 - 修改了template_manager.py和game_manager.py中的模板加载逻辑，使用'is_cn_server'标志正确选择模板目录
 - 优化了配置保存逻辑，确保在连接设备时正确设置所有设备的服务器配置
 
-Shadowverse Automation(2025/9/22)
+### Shadowverse Automation(2025/9/22)
 - 修复了打包后exe文件无法正确更新config.json的问题：统一使用get_exe_dir()函数获取可执行文件目录路径
 - 修改了main_window.py中的load_current_config和connect_device方法，将硬编码的多层os.path.dirname调用替换为get_exe_dir()函数
 - 更新了PyInstaller打包配置，包含uiautomator2的assets资源文件（u2.jar等）
