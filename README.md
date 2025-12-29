@@ -1,32 +1,47 @@
 # Shadowverse Automation
 
+> **⚠️ 重要通知：该项目现已停止更新，如有需求请移步 → [https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto](https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto)**
+
 影之诗(Shadowverse)自动对战辅助工具，支持图形界面操作、卡组管理、设备连接和脚本控制等功能。
 
 ## 项目功能特性
 
 ### 核心功能
+
 - **自动对战**：支持影之诗游戏自动对战、卡牌选择和操作
+
 - **图形界面**：提供直观的用户界面，便于设置参数和控制脚本
+
 - **多设备支持**：可同时连接并控制多个游戏设备
+
 - **OCR识别**：支持CPU和GPU模式的文字识别
+
 - **脚本控制**：提供开始、暂停、恢复等控制功能
+
 - **实时日志**：显示程序运行状态和详细日志信息
 
 ### 卡组管理功能
+
 - **卡片选择**：从卡库中选择卡片组成卡组
+
 - **卡组管理**：保存、加载和修改已创建的卡组
+
 - **卡组分享**：生成和导入分享码，便于分享卡组配置
+
 - **卡片优先级配置**：设置不同卡片的使用优先级
 
 ### UI特性
+
 - **模块化设计**：各功能页面独立分离，便于维护和扩展
+
 - **中文支持**：完整的中文界面和日志输出
+
 - **自定义样式**：支持自定义界面样式和字体
+
 - **通知系统**：提供程序运行状态的通知功能
 
 ## 项目结构
 
-```
 shadowverse_automation/
 ├── src/                       # 源代码主目录
 │   ├── ui/                    # UI相关代码
@@ -46,104 +61,149 @@ shadowverse_automation/
 ├── config.json                # 配置文件
 ├── requirements.txt           # 依赖库列表
 └── README.md                  # 项目说明文档
-```
+
+> **⚠️ 重要通知：该项目现已停止更新，如有需求请移步 → [https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto](https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto)**
 
 ## 安装说明
 
 ### 环境要求
+
 - Python 3.8+ 
+
 - 安装PyTorch环境（支持EasyOCR）
+
 - 移动设备或模拟器（已安装影之诗游戏）
 
 ### 安装依赖
 
-```bash
 # 使用pip安装所有依赖
 pip install -r requirements.txt
 
 # 单独安装PyTorch（如需GPU支持，请根据官方文档选择合适的版本）
 pip install torch==2.7.1 torchvision==0.22.1
-```
 
 ## 使用方法
 
 ### 启动图形界面版本
 
-```bash
 python shadowverse_auto_ui.py
-```
 
 ## 配置说明
 
 ### 主要配置文件
+
 - **config.json**：主配置文件，包含程序各项设置
+
 - **MULTI_DEVICE_CONFIG.md**：多设备配置说明文档
 
 ### 配置选项
+
 - **设备连接**：配置ADB路径和设备连接参数
+
 - **脚本参数**：设置拖拽速度、操作间隔等参数
+
 - **卡片配置**：设置卡片优先级和使用策略
+
 - **OCR设置**：选择OCR模式（CPU或GPU）
 
 ## 使用教程
 
 ### 1. 设备连接
+
 - 确保移动设备已开启USB调试模式
+
 - 或使用模拟器（推荐使用MuMu模拟器）
+
 - 在UI界面中设置ADB路径和设备地址
+
 - 点击"连接设备"按钮建立连接
 
 ### 2. 卡组选择
+
 - 进入"卡片选择"页面
+
 - 从卡库中选择卡片添加到卡组
+
 - 可保存当前卡组以便后续使用
+
 - 使用分享功能生成或导入卡组分享码
 
 ### 3. 脚本控制
+
 - 连接设备并选择好卡组后，点击"开始脚本"按钮
+
 - 可随时点击"暂停脚本"和"恢复脚本"按钮控制脚本
+
 - 点击"停止脚本"按钮结束当前运行
 
 ## 注意事项
 
 ### 资源文件要求
+
 - 确保`quanka`目录包含所有必要的卡片图片
+
 - 确保`templates`目录包含所有必要的识别模板
+
 - OCR模型文件放置在`models`目录下
 
 ### 常见问题
+
 1. **设备连接失败**：检查ADB路径是否正确，设备是否已开启USB调试模式
+
 2. **OCR识别错误**：确保模型文件完整，可尝试切换CPU模式
+
 3. **脚本运行异常**：查看日志文件（main_log.log或ui_log.log）获取详细错误信息
 
 ## 免责声明
+
 - 本工具仅供学习和研究使用，请勿用于任何商业用途
+
 - 使用本工具可能违反游戏的用户协议，请谨慎使用
+
 - 开发者不对使用本工具造成的任何后果负责
 
 ## 更新日志
+
 ### Shadowverse Automation(2025/9/18)
+
 - 优化了设备连接逻辑，解决了`'AdbClient' object is not callable`错误
+
 - 修复了暂停/恢复功能，确保UI和脚本之间能正确传递命令
+
 - 重构了UI代码，提高了可维护性和扩展性
+
 - 增强了异常处理，添加了详细的错误追踪信息
 
 ### Shadowverse Automation(2025/9/19)
+
 - 优化了UI，重构了部分UI，更新了窗口大小调整设置
+
 - 优化了配置保存逻辑，确保config.json不存在时能创建新配置字典
+
 - 修复了卡组保存功能，添加quanka目录创建和save_time字段记录保存时间
+
 - 优化了卡组加载功能，重构load_saved_deck方法，修复缩进错误，提高卡片查找效率
+
 - 增强了错误处理，添加了详细的调试信息输出
+
 - 修复了卡片查找逻辑的缩进问题，确保代码结构正确
 
 ### Shadowverse Automation(2025/9/21)
+
 - 修复了服务器切换功能问题：选择国服并连接设备运行后实际使用的却是国际服配置
+
 - 引入了明确的'is_cn_server'标志来区分国服和国际服配置，避免与'is_global'（用于标记全局默认设备）混淆
+
 - 修改了template_manager.py和game_manager.py中的模板加载逻辑，使用'is_cn_server'标志正确选择模板目录
+
 - 优化了配置保存逻辑，确保在连接设备时正确设置所有设备的服务器配置
 
 ### Shadowverse Automation(2025/9/22)
+
 - 修复了打包后exe文件无法正确更新config.json的问题：统一使用get_exe_dir()函数获取可执行文件目录路径
+
 - 修改了main_window.py中的load_current_config和connect_device方法，将硬编码的多层os.path.dirname调用替换为get_exe_dir()函数
+
 - 更新了PyInstaller打包配置，包含uiautomator2的assets资源文件（u2.jar等）
+
 - 解决了uiautomator2初始化时"Resource assets/u2.jar not found"错误，确保设备连接初始化成功
