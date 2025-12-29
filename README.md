@@ -40,27 +40,6 @@
 
 - **通知系统**：提供程序运行状态的通知功能
 
-## 项目结构
-
-shadowverse_automation/
-├── src/                       # 源代码主目录
-│   ├── ui/                    # UI相关代码
-│   │   ├── pages/             # 各功能页面
-│   │   ├── components/        # UI组件
-│   │   ├── utils/             # UI工具函数
-│   │   ├── notification_manager.py # 通知管理器
-│   │   └── main_window.py     # 主窗口类
-│   ├── device/                # 设备管理代码
-│   ├── game/                  # 游戏逻辑代码
-│   ├── config/                # 配置管理代码
-│   └── utils/                 # 通用工具函数
-├── quanka/                    # 卡片图片资源
-├── templates/                 # 识别模板图片
-├── models/                    # OCR模型文件
-├── shadowverse_auto_ui.py     # 带UI的主程序入口
-├── config.json                # 配置文件
-├── requirements.txt           # 依赖库列表
-└── README.md                  # 项目说明文档
 
 > **⚠️ 重要通知：该项目现已停止更新，如有需求请移步 → [https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto](https://github.com/DaydreamStarRiver/Svb_Byd_Deck_Auto)**
 
